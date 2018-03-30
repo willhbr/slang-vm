@@ -1,0 +1,8 @@
+(def inspect 8)
+
+(let [foo 5
+      foo 9]
+  (let [foo 6]
+    (print foo))
+  (print foo)
+  (inspect foo))
