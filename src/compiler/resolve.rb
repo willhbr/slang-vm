@@ -1,6 +1,7 @@
 require_relative './objects'
 
 class Resolver
+  KEYWORDS = ['if']
   def initialize(defs=Hash.new)
     @defs = defs
     @next_id = 0
@@ -23,6 +24,9 @@ class Resolver
       end
       res
     when Identifier
+      if KEYWORDS.include? ast.value
+        return
+      end
       unless bind_to_previous(ast, scopes)
         raise "Undefined var: #{ast}"
       end
