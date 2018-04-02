@@ -116,11 +116,13 @@ func (vm *Coroutine) Run(startIndex int) {
 			panic("Can't do RETURN yet")
 		case NEW_MAP:
 			m := ds.NewMap()
-			fmt.Println(m)
+			vm.Stack.Push(m)
 		case NEW_VECTOR:
-			panic("Can't do NEW_VECTOR yet")
+			v := ds.NewVector()
+			vm.Stack.Push(v)
 		case NEW_LIST:
-			panic("Can't do NEW_LIST yet")
+			l := ds.NewList()
+			vm.Stack.Push(l)
 		case CONS:
 			panic("Can't do CONS yet")
 		case INSERT:
