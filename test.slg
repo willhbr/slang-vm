@@ -3,3 +3,5 @@
   (if foo
     (print foo)
     (print 56)))
+
+{}

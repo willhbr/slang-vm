@@ -1,8 +1,10 @@
 package main
 
 import (
+	"./ds"
 	"fmt"
 	"io/ioutil"
+	"os"
 )
 
 const (
@@ -23,37 +25,35 @@ const (
 	INSERT     = 15
 )
 
-type Value int
-
 type Frame struct {
-	Registers []Value
+	Registers []ds.Value
 }
 
 func NewFrame() *Frame {
-	return &Frame{Registers: make([]Value, 100, 100)}
+	return &Frame{Registers: make([]ds.Value, 100, 100)}
 }
 
 type Stack struct {
-	values *[]Value
+	values *[]ds.Value
 }
 
-func (s *Stack) Pop() Value {
+func (s *Stack) Pop() ds.Value {
 	stack := *s.values
 	value, values := stack[len(stack)-1], stack[:len(stack)-1]
 	*s.values = values
 	return value
 }
 
-func (s Stack) Push(val Value) {
+func (s Stack) Push(val ds.Value) {
 	*s.values = append(*s.values, val)
 }
 
-func (s Stack) Peek() Value {
+func (s Stack) Peek() ds.Value {
 	return (*s.values)[len(*s.values)-1]
 }
 
 func MakeStack() Stack {
-	vals := make([]Value, 0, 100)
+	vals := make([]ds.Value, 0, 100)
 	return Stack{values: &vals}
 }
 
@@ -96,7 +96,7 @@ func (vm *Coroutine) Run(startIndex int) {
 		case CONST_I:
 			value := program[index]
 			index++
-			vm.Stack.Push(Value(value))
+			vm.Stack.Push(ds.Value(value))
 		case CONST_S:
 			panic("Can't do CONST_S yet")
 		case JUMP:
@@ -115,7 +115,8 @@ func (vm *Coroutine) Run(startIndex int) {
 		case RETURN:
 			panic("Can't do RETURN yet")
 		case NEW_MAP:
-			panic("Can't do NEW_MAP yet")
+			m := ds.NewMap()
+			fmt.Println(m)
 		case NEW_VECTOR:
 			panic("Can't do NEW_VECTOR yet")
 		case NEW_LIST:
@@ -129,7 +130,8 @@ func (vm *Coroutine) Run(startIndex int) {
 }
 
 func main() {
-	program, err := ioutil.ReadFile("output.bin")
+	program, err := ioutil.ReadFile(os.Args[1])
+	fmt.Println(program)
 	if err != nil {
 		panic(err)
 	}
