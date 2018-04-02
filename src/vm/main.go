@@ -2,27 +2,10 @@ package main
 
 import (
 	"./ds"
+	op "./op_codes"
 	"fmt"
 	"io/ioutil"
 	"os"
-)
-
-const (
-	LOAD       = 1
-	STORE      = 2
-	DISPATCH   = 3
-	APPLY      = 4
-	CONST_I    = 5
-	CONST_S    = 6
-	JUMP       = 7
-	AND        = 8
-	OR         = 9
-	RETURN     = 10
-	NEW_MAP    = 11
-	NEW_VECTOR = 12
-	NEW_LIST   = 13
-	CONS       = 14
-	INSERT     = 15
 )
 
 type Frame struct {
@@ -76,32 +59,33 @@ func (vm *Coroutine) Run(startIndex int) {
 	currentFrame := vm.CurrentFrame
 	for index < size {
 		operation := program[index]
+		fmt.Printf("Running: %s\n", op.ToString(operation))
 		index++
 		switch operation {
-		case LOAD:
+		case op.LOAD:
 			vm.Stack.Push(currentFrame.Registers[program[index]])
 			index++
-		case STORE:
+		case op.STORE:
 			value := vm.Stack.Pop()
 			register := program[index]
 			currentFrame.Registers[register] = value
 			index++
-		case DISPATCH:
+		case op.DISPATCH:
 			value := vm.Stack.Pop()
 			// This will be the ID of the func to call, but not yet
 			index++
 			fmt.Println(value)
-		case APPLY:
+		case op.APPLY:
 			panic("Can't do APPLY yet")
-		case CONST_I:
+		case op.CONST_I:
 			value := program[index]
 			index++
 			vm.Stack.Push(ds.Value(value))
-		case CONST_S:
+		case op.CONST_S:
 			panic("Can't do CONST_S yet")
-		case JUMP:
+		case op.JUMP:
 			panic("Can't do JUMP yet")
-		case AND:
+		case op.AND:
 			increase := program[index]
 			index++
 			if vm.Stack.Peek() != 0 {
@@ -110,22 +94,22 @@ func (vm *Coroutine) Run(startIndex int) {
 					break
 				}
 			}
-		case OR:
+		case op.OR:
 			panic("Can't do OR yet")
-		case RETURN:
+		case op.RETURN:
 			panic("Can't do RETURN yet")
-		case NEW_MAP:
+		case op.NEW_MAP:
 			m := ds.NewMap()
 			vm.Stack.Push(m)
-		case NEW_VECTOR:
+		case op.NEW_VECTOR:
 			v := ds.NewVector()
 			vm.Stack.Push(v)
-		case NEW_LIST:
+		case op.NEW_LIST:
 			l := ds.NewList()
 			vm.Stack.Push(l)
-		case CONS:
+		case op.CONS:
 			panic("Can't do CONS yet")
-		case INSERT:
+		case op.INSERT:
 			panic("Can't do INSERT yet")
 		}
 	}

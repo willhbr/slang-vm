@@ -100,3 +100,22 @@ class Code
     @args.size + 1
   end
 end
+
+if __FILE__==$0
+  File.open(ARGV[0], 'w') do |file|
+    file.print "package op_codes\nconst ("
+    Code::CODE_VALUES.each do |name, value|
+      file.puts "#{name} = #{value}"
+    end
+    file.puts ')'
+
+    file.puts 'func ToString(code byte) string {'
+    file.puts 'switch code {'
+    Code::CODE_VALUES.each do |name, value|
+      file.puts "case #{name}: return \"#{name}\""
+    end
+    file.puts 'default: return "UNKNOWN"'
+    file.puts '}}'
+
+  end
+end
