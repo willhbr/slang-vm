@@ -59,7 +59,7 @@ func (vm *Coroutine) Run(startIndex int) {
 	currentFrame := vm.CurrentFrame
 	for index < size {
 		operation := program[index]
-		fmt.Printf("Running: %s\n", op.ToString(operation))
+		fmt.Println(op.ToString(operation))
 		index++
 		switch operation {
 		case op.LOAD:
@@ -80,15 +80,23 @@ func (vm *Coroutine) Run(startIndex int) {
 		case op.CONST_I:
 			value := program[index]
 			index++
-			vm.Stack.Push(ds.Value(value))
+			vm.Stack.Push(ds.Value(int(value)))
 		case op.CONST_S:
 			panic("Can't do CONST_S yet")
+		case op.CONST_TRUE:
+			vm.Stack.Push(ds.Value(true))
+		case op.CONST_FALSE:
+			vm.Stack.Push(ds.Value(false))
+		case op.CONST_NIL:
+			vm.Stack.Push(ds.Nil)
 		case op.JUMP:
-			panic("Can't do JUMP yet")
+			increase := int(program[index])
+			index++
+			index += increase
 		case op.AND:
 			increase := program[index]
 			index++
-			if vm.Stack.Peek() != 0 {
+			if vm.Stack.Pop() != 0 {
 				index += int(increase)
 				if index >= size {
 					break

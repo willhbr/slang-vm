@@ -1,8 +1,24 @@
 package ds
 
+type Type struct {
+	name string
+}
+
+type Instance struct {
+	Type *Type
+}
+
+func GetType(thing interface{}) *Type {
+	// TODO get a type struct for the thing
+	// Fallback on things that are Instances
+	return &Type{name: "Unknown"}
+}
+
 // The one and only nil
 // TODO make own type
-const Nil = 0
+var NilType = Type{name: "NilType"}
+
+var Nil = Instance{Type: &NilType}
 
 type Value interface{}
 

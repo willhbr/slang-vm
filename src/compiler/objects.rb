@@ -14,16 +14,27 @@ end
 class Identifier
   attr_accessor :value
   attr_accessor :code
+  attr_accessor :location
 
   KEYWORDS = [
     'let',
     'def',
-    'fn'
+    'fn',
+    'true',
+    'false',
+    'nil'
   ]
 
-  def initialize(value)
+  def initialize(value, location)
     @value = value
+    @location = location
   end
+
+  def name_and_location
+    line, col = @location
+    "#{@value} [#{line}:#{col}]"
+  end
+
 
   def inspect
     if KEYWORDS.include? @value

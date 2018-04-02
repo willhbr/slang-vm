@@ -10,7 +10,7 @@ tokens = scanner.read
 tree = Parser.new(tokens).program
 
 res = Resolver.new({
-  "print" => Identifier.new("print"),
+  "print" => Identifier.new("print", [0, 0]),
 })
 tree.map do |node|
   res.resolve(node)

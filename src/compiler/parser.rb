@@ -9,10 +9,12 @@ class Scanner
   class Token
     attr_reader :type
     attr_reader :value
+    attr_reader :location
 
-    def initialize(type, value)
+    def initialize(type, value, location)
       @type = type
       @value = value
+      @location = location
     end
 
     def to_s
@@ -26,6 +28,8 @@ class Scanner
     @filename = filename
     @contents = contents
     @index = 0
+    @column = 1
+    @line = 1
   end
 
   def read
@@ -76,7 +80,11 @@ class Scanner
     when ':'
       iden = identifier("")
       return sym(:ATOM, iden)
-    when ' ', "\t", "\n", ','
+    when ' ', "\t", ','
+      return nil
+    when "\n"
+      @column = 1
+      @line += 1
       return nil
     when '"'
       return sym(:STRING, string)
@@ -129,7 +137,7 @@ class Scanner
   end
 
   def sym(type, value=nil)
-    Token.new(type, value)
+    Token.new(type, value, [@line, @column])
   end
 
   def peek?
@@ -143,6 +151,7 @@ class Scanner
   def advance!
     c = @contents[@index]
     raise "EOF" unless c
+    @column += 1
     @index += 1
     c
   end
@@ -207,7 +216,7 @@ class Parser
   end
 
   def identifier(symbol)
-    Identifier.new symbol.value
+    Identifier.new symbol.value, symbol.location
   end
 
   def map

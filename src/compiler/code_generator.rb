@@ -25,7 +25,16 @@ class CodeGenerator
         push Code.INSERT
       end
     when Identifier
-      push Code.LOAD(ast.code)
+      case ast.value
+      when 'true'
+        push Code.CONST_TRUE
+      when 'true'
+        push Code.CONST_FALSE
+      when 'nil'
+        push Code.CONST_NIL
+      else
+        push Code.LOAD(ast.code)
+      end
     when String
       code = @program.add_string(ast)      
       push Code.CONST_S(code)
@@ -45,7 +54,7 @@ class CodeGenerator
         name, expr = slice
         raise "Not an identifier: #{name}" unless name.is_a? Identifier
         generate(expr)
-        push Code.STORE(name.code)
+        push Code.STORE(name.code, name.name_and_location)
       end
       ast[2..-1].each do |node|
         generate(node)
@@ -75,12 +84,12 @@ class CodeGenerator
       ast[1..-1].each do |arg|
         generate(arg)
       end
-      push Code.DISPATCH(first.code)
+      push Code.DISPATCH(first.code, first.name_and_location)
     else
       ast.each do |arg|
         generate(arg)
       end
-      push Code.DISPATCH(-1)
+      push Code.DISPATCH(-1, 'apply')
     end
   end
 

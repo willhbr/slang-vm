@@ -44,17 +44,20 @@ class Code
   APPLY = 4
   CONST_I = 5
   CONST_S = 6
-  JUMP = 7
-  AND = 8
-  OR = 9
-  RETURN = 10
+  CONST_TRUE = 7
+  CONST_FALSE = 8
+  CONST_NIL = 9
+  JUMP = 10
+  AND = 11
+  OR = 12
+  RETURN = 13
   # ===
-  NEW_MAP = 11
-  NEW_VECTOR = 12
-  NEW_LIST = 13
+  NEW_MAP = 14
+  NEW_VECTOR = 15
+  NEW_LIST = 16
 
-  CONS = 14
-  INSERT = 15
+  CONS = 17
+  INSERT = 18
 
   CODE_VALUES = Hash.new
   CODE_NAMES = Hash.new
@@ -72,13 +75,25 @@ class Code
   end
 
   attr_reader :args
-  def initialize(code, *args)
+  attr_reader :debug
+  def initialize(code, args=[], debug=nil)
     @code = code
-    @args = args
+    @args = args.is_a?(Array) ? args : [args]
+    if debug
+      @debug = debug.is_a?(Array) ? debug : [debug]
+    else
+      @debug = nil
+    end
   end
 
   def to_s
-    "#{self.class.stringify(@code)}\t#{@args.join("\t")}"
+    name = self.class.stringify(@code)
+    if @debug
+      args = @args.zip(@debug).map { |a, d| "#{d || '?'} (#{a})" }.join("\t")
+    else
+      args = @args.join("\t")
+    end
+    '%12s %s' % [name, args]
   end
 
   def self.stringify(code)
@@ -116,6 +131,5 @@ if __FILE__==$0
     end
     file.puts 'default: return "UNKNOWN"'
     file.puts '}}'
-
   end
 end

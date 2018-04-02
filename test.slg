@@ -1,8 +1,1 @@
-6
-(let [foo 5]
-  (if foo
-    (print foo)
-    (print 56)))
-
-{}
-(print [])
+(print nil)

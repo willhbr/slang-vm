@@ -5,15 +5,18 @@ DISPATCH = 3
 APPLY = 4
 CONST_I = 5
 CONST_S = 6
-JUMP = 7
-AND = 8
-OR = 9
-RETURN = 10
-NEW_MAP = 11
-NEW_VECTOR = 12
-NEW_LIST = 13
-CONS = 14
-INSERT = 15
+CONST_TRUE = 7
+CONST_FALSE = 8
+CONST_NIL = 9
+JUMP = 10
+AND = 11
+OR = 12
+RETURN = 13
+NEW_MAP = 14
+NEW_VECTOR = 15
+NEW_LIST = 16
+CONS = 17
+INSERT = 18
 )
 func ToString(code byte) string {
 switch code {
@@ -23,6 +26,9 @@ case DISPATCH: return "DISPATCH"
 case APPLY: return "APPLY"
 case CONST_I: return "CONST_I"
 case CONST_S: return "CONST_S"
+case CONST_TRUE: return "CONST_TRUE"
+case CONST_FALSE: return "CONST_FALSE"
+case CONST_NIL: return "CONST_NIL"
 case JUMP: return "JUMP"
 case AND: return "AND"
 case OR: return "OR"
