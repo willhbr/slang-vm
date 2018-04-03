@@ -8,15 +8,29 @@ type Instance struct {
 	Type *Type
 }
 
+var intType = Type{name: "Int"}
+var stringType = Type{name: "String"}
+var boolType = Type{name: "Bool"}
+
 func GetType(thing interface{}) *Type {
 	// TODO get a type struct for the thing
 	// Fallback on things that are Instances
 	return &Type{name: "Unknown"}
+	switch thing.(type) {
+	case int:
+		return &intType
+	case string:
+		return &stringType
+	case bool:
+		return &boolType
+	case Instance:
+		return thing.(Instance).Type
+	default:
+		panic("Cannot get type of variable")
+	}
 }
 
-// The one and only nil
-// TODO make own type
-var NilType = Type{name: "NilType"}
+var NilType = Type{name: "Nil"}
 
 var Nil = Instance{Type: &NilType}
 

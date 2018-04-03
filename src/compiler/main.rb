@@ -21,9 +21,6 @@ tree.map do |node|
   cg.generate(node)
 end
 
-puts cg.program
-
 File.open(ARGV[1], 'wb') do |output|
-  bytes = cg.program.bytes
-  output.write(bytes.pack('C' * bytes.size))
+  cg.program.write_to(output)
 end

@@ -37,7 +37,7 @@ class CodeGenerator
       end
     when String
       code = @program.add_string(ast)      
-      push Code.CONST_S(code)
+      push Code.CONST_S(code, ast)
     when Integer
       push Code.CONST_I(ast)
     end

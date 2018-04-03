@@ -46,20 +46,23 @@ type Coroutine struct {
 	Program      *Program
 }
 
-type Program []byte
+type Program struct {
+	Instructions []byte
+	Strings      []string
+}
 
 func NewCoroutine() *Coroutine {
 	return &Coroutine{Stack: MakeStack(), CurrentFrame: NewFrame()}
 }
 
 func (vm *Coroutine) Run(startIndex int) {
-	program := *vm.Program
+	program := vm.Program.Instructions
+	strings := vm.Program.Strings
 	size := len(program)
-	index := 0
+	index := startIndex
 	currentFrame := vm.CurrentFrame
 	for index < size {
 		operation := program[index]
-		fmt.Println(op.ToString(operation))
 		index++
 		switch operation {
 		case op.LOAD:
@@ -82,7 +85,10 @@ func (vm *Coroutine) Run(startIndex int) {
 			index++
 			vm.Stack.Push(ds.Value(int(value)))
 		case op.CONST_S:
-			panic("Can't do CONST_S yet")
+			idx := program[index]
+			index++
+			str := strings[idx]
+			vm.Stack.Push(ds.Value(str))
 		case op.CONST_TRUE:
 			vm.Stack.Push(ds.Value(true))
 		case op.CONST_FALSE:
@@ -119,18 +125,36 @@ func (vm *Coroutine) Run(startIndex int) {
 			panic("Can't do CONS yet")
 		case op.INSERT:
 			panic("Can't do INSERT yet")
+		default:
+			panic(fmt.Errorf("Unknown instruction at %d: %d", index, program[index]))
 		}
 	}
 }
 
+func ParseStrings(instructions []byte) ([]string, int) {
+	count := int(instructions[0])
+	strings := make([]string, count, count)
+	startPosition := 1
+
+	for index := 0; index < count; index++ {
+		length := int(instructions[startPosition])
+		startPosition++
+		endPosition := startPosition + length
+		strings[index] = string(instructions[startPosition:endPosition])
+		startPosition = endPosition
+	}
+	return strings, startPosition
+}
+
 func main() {
-	program, err := ioutil.ReadFile(os.Args[1])
-	fmt.Println(program)
+	instructions, err := ioutil.ReadFile(os.Args[1])
+	fmt.Println(instructions)
 	if err != nil {
 		panic(err)
 	}
 	coroutine := NewCoroutine()
-	prog := Program(program)
+	strings, startIndex := ParseStrings(instructions)
+	prog := Program{Instructions: instructions, Strings: strings}
 	coroutine.Program = &prog
-	coroutine.Run(0)
+	coroutine.Run(startIndex)
 }

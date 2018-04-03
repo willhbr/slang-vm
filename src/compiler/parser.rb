@@ -112,9 +112,9 @@ class Scanner
   end
 
   def string
-    start = @index - 1
+    start = @index
     advance! while peek? != '"'
-    str = @contents[start..@index]
+    str = @contents[start..@index - 1]
     advance!
     str
   end

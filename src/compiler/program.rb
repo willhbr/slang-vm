@@ -3,7 +3,7 @@ class Program
 
   def initialize
     @strings = Hash.new # string to const id
-    @string_code = 0
+    @string_code = -1
     @buffer = Array.new
     @position = 0
   end
@@ -29,6 +29,35 @@ class Program
       code >> buff
     end
     buff
+  end
+
+  def string_bytes
+    if @strings.size != @string_code + 1
+      raise "Strings don't match code length"
+    end
+    buff = []
+    buff << @strings.size
+
+    strings = Array.new @strings.size
+    @strings.each do |string, idx|
+      strings[idx] = string
+    end
+
+    strings.each do |string|
+      size = string.bytesize
+      buff << size
+      string.each_byte do |byte|
+        buff << byte
+      end
+    end
+    buff
+  end
+
+  def write_to(file)
+    strings = self.string_bytes
+    bytes = self.bytes
+    file.write(strings.pack('C' * strings.size))
+    file.write(bytes.pack('C' * bytes.size))
   end
 
   def to_s
