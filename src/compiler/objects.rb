@@ -12,7 +12,8 @@ class Array
 end
 
 class Identifier
-  attr_accessor :value
+  attr_accessor :module
+  attr_accessor :var
   attr_accessor :code
   attr_accessor :location
 
@@ -26,21 +27,31 @@ class Identifier
   ]
 
   def initialize(value, location)
-    @value = value
+    sections = value.split('.')
+    @module = sections[0..-2].join('.')
+    @var = sections[-1]
     @location = location
+  end
+
+  def value
+    @module + '.' + @var
+  end
+
+  def local?
+    @module == nil
   end
 
   def name_and_location
     line, col = @location
-    "#{@value} [#{line}:#{col}]"
+    "#{value} [#{line}:#{col}]"
   end
 
 
   def inspect
     if KEYWORDS.include? @value
-      @value
+      value
     else
-      "#{@value}_#{@code}"
+      "#{value}_#{@code}"
     end
   end
 end

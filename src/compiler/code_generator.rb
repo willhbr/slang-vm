@@ -48,43 +48,51 @@ class CodeGenerator
     unless first
       push Code.NEW_LIST
     end
-    if first.is_a?(Identifier) && first.value == 'let'
-      binds = ast[1]
-      binds.each_slice(2) do |slice|
-        name, expr = slice
-        raise "Not an identifier: #{name}" unless name.is_a? Identifier
-        generate(expr)
-        push Code.STORE(name.code, name.name_and_location)
-      end
-      ast[2..-1].each do |node|
-        generate(node)
-      end
-    elsif first.is_a?(Identifier) && first.value == 'def'
-      nil
-    elsif first.is_a?(Identifier) && first.value == 'if'
-      _, cond, then_block, else_block = ast
-      generate(cond)
-      jump = Code.AND(-1) # Don't know where to jump to
-      push jump
-      start = @program.position
-      generate(then_block)
-      if else_block
-        else_jump = Code.JUMP(-1)
-        push else_jump
-        else_start = @program.position
-        jump.args[0] = @program.position - start
-        generate(else_block)
-        # jump to end of else block
-        else_jump.args[0] = @program.position - else_start
+    if first.is_a? Identifier
+      case first.value
+      when 'let'
+        binds = ast[1]
+        binds.each_slice(2) do |slice|
+          name, expr = slice
+          raise "Not an identifier: #{name}" unless name.is_a? Identifier
+          generate(expr)
+          push Code.STORE(name.code, name.name_and_location)
+        end
+        ast[2..-1].each do |node|
+          generate(node)
+        end
+      when 'def'
+        raise 'no defs yet'
+      when 'if'
+        _, cond, then_block, else_block = ast
+        generate(cond)
+        jump = Code.AND(-1) # Don't know where to jump to
+        push jump
+        start = @program.position
+        generate(then_block)
+        if else_block
+          else_jump = Code.JUMP(-1)
+          push else_jump
+          else_start = @program.position
+          jump.args[0] = @program.position - start
+          generate(else_block)
+          # jump to end of else block
+          else_jump.args[0] = @program.position - else_start
+        else
+          # jump to end of if
+          jump.args[0] = @program.position - start
+        end
       else
-        # jump to end of if
-        jump.args[0] = @program.position - start
+        ast[1..-1].each do |arg|
+          generate(arg)
+        end
+        if first.local?
+          push Code.CALL_LOCAL(first.code, first.name_and_location)
+        else
+          codes = [first.code[0], first.code[1]]
+          push Code.CALL_METHOD(codes, first.name_and_location)
+        end
       end
-    elsif first.is_a?(Identifier)
-      ast[1..-1].each do |arg|
-        generate(arg)
-      end
-      push Code.DISPATCH(first.code, first.name_and_location)
     else
       ast.each do |arg|
         generate(arg)

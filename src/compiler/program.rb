@@ -69,7 +69,8 @@ end
 class Code
   LOAD = 1
   STORE = 2
-  DISPATCH = 3
+  CALL_METHOD = 3 # From a module/ method pair
+  CALL_LOCAL = 19 # From a register
   APPLY = 4
   CONST_I = 5
   CONST_S = 6
@@ -108,6 +109,9 @@ class Code
   def initialize(code, args=[], debug=nil)
     @code = code
     @args = args.is_a?(Array) ? args : [args]
+    if @args.any?(&:nil?)
+      raise "No args can be nil"
+    end
     if debug
       @debug = debug.is_a?(Array) ? debug : [debug]
     else

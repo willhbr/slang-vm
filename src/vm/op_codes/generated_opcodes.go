@@ -1,7 +1,8 @@
 package op_codes
 const (LOAD = 1
 STORE = 2
-DISPATCH = 3
+CALL_METHOD = 3
+CALL_LOCAL = 19
 APPLY = 4
 CONST_I = 5
 CONST_S = 6
@@ -22,7 +23,8 @@ func ToString(code byte) string {
 switch code {
 case LOAD: return "LOAD"
 case STORE: return "STORE"
-case DISPATCH: return "DISPATCH"
+case CALL_METHOD: return "CALL_METHOD"
+case CALL_LOCAL: return "CALL_LOCAL"
 case APPLY: return "APPLY"
 case CONST_I: return "CONST_I"
 case CONST_S: return "CONST_S"

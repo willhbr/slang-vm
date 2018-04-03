@@ -2,6 +2,7 @@ package main
 
 import (
 	"./ds"
+	"./funcs"
 	op "./op_codes"
 	"fmt"
 	"io/ioutil"
@@ -63,6 +64,7 @@ func (vm *Coroutine) Run(startIndex int) {
 	currentFrame := vm.CurrentFrame
 	for index < size {
 		operation := program[index]
+		fmt.Println(op.ToString(operation))
 		index++
 		switch operation {
 		case op.LOAD:
@@ -73,11 +75,19 @@ func (vm *Coroutine) Run(startIndex int) {
 			register := program[index]
 			currentFrame.Registers[register] = value
 			index++
-		case op.DISPATCH:
+		case op.CALL_LOCAL:
 			value := vm.Stack.Pop()
 			// This will be the ID of the func to call, but not yet
 			index++
 			fmt.Println(value)
+		case op.CALL_METHOD:
+			value := vm.Stack.Pop()
+			module := program[index]
+			index++
+			method := program[index]
+			index++
+			fun := funcs.Modules[module][method]
+			vm.Stack.Push(fun(value))
 		case op.APPLY:
 			panic("Can't do APPLY yet")
 		case op.CONST_I:

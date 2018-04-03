@@ -133,7 +133,7 @@ class Scanner
   end
 
   def is_iden_start(char)
-    'qwertyuiopasdfghjklzxcvbnm!@#$%^&*-_=+\|:?/,<>.'.include? char
+    'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm!@#$%^&*-_=+\|:?/,<>.'.include? char
   end
 
   def sym(type, value=nil)

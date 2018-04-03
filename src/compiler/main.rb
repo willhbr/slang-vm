@@ -12,6 +12,7 @@ tree = Parser.new(tokens).program
 res = Resolver.new({
   "print" => Identifier.new("print", [0, 0]),
 })
+
 tree.map do |node|
   res.resolve(node)
 end
@@ -20,6 +21,8 @@ cg = CodeGenerator.new
 tree.map do |node|
   cg.generate(node)
 end
+
+puts cg.program
 
 File.open(ARGV[1], 'wb') do |output|
   cg.program.write_to(output)

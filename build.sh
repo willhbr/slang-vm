@@ -14,4 +14,7 @@ cd "$back"
 cd src/vm/op_codes
 go generate
 cd "$back"
+cd src/vm/funcs
+go generate
+cd "$back"
 go build -o bin/slgc src/vm/main.go
