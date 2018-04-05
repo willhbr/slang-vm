@@ -1,72 +1,82 @@
+require_relative './objects'
+
+class Defs
+  @@defs = Hash.new
+  @@next_code = 0
+  def self.defs
+    @@defs
+  end
+
+  def self.def_count
+    @@next_code
+  end
+
+  def self.get?(identifier, mod=nil)
+    if mod && (in_this = @@defs[mod + '.' + identifier.value])
+      return in_this
+    end
+    if iden = @@defs[identifier.value]
+      return iden
+    end
+    raise "Unknown module for #{identifier.value} (have you declared a module?)" unless mod
+    nil
+  end
+
+  def self.set_and_return(identifier, mod=nil)
+    identifier.module ||= mod
+    raise "Unknown module for #{identifier.value} (have you declared a module?)" unless identifier.module
+    if iden = @@defs[identifier.value]
+      identifier.code = iden.code
+    else
+      identifier.code = @@next_code
+      @@defs[identifier.value] = identifier
+      @@next_code += 1
+    end
+    identifier.code
+  end
+
+  def self.define_module(identifier)
+    identifier.to_module_only!
+    if iden = @@defs[identifier.value]
+      identifier.code = iden.code
+    else
+      identifier.code = @@next_code
+      @@defs[identifier.value] = identifier
+      @@next_code += 1
+    end
+    identifier.code
+  end
+end
+
 class Builtins
   MODULES = {
     IO: [
       :puts
     ]
   }
+end
 
-  class << self
-    next_module = 0
-    with_codes = Hash.new
-    Builtins::MODULES.sort.each do |mod, methods|
-      method_codes = Hash.new
-      methods.sort.each_with_index do |method, index|
-        method_codes[method] = index
-        method_codes[index] = method
-      end
-      with_codes[mod] = {
-        id: next_module,
-        name: mod,
-        methods: method_codes,
-      }
-      with_codes[next_module] = with_codes[mod]
-      next_module += 1
-    end
-
-    MODULE_CODES = with_codes
-
-    def [](mod, method)
-      mod_methods = MODULE_CODES[mod]
-      return unless mod_methods
-      mod_id = mod_methods[:id]
-      method_id = mod_methods[:methods][method]
-      return unless method_id
-      [mod_id, method_id]
-    end
-
-    def module_code(mod)
-      mod_methods = MODULE_CODES[mod]
-      mod_methods[:id]
-    end
-
-    def module_name(mod)
-      mod_methods = MODULE_CODES[mod]
-      mod_methods[:name]
-    end
-
-    def modules
-      MODULE_CODES
-    end
+Builtins::MODULES.sort.each do |name, methods|
+  Defs.define_module(Identifier.new(name.to_s, [nil, nil]))
+  methods.sort.each do |method|
+    Defs.set_and_return(Identifier.new(method.to_s, [nil, nil]), name.to_s)
   end
 end
 
 if __FILE__==$0
-  Builtins.modules
   File.open(ARGV[0], 'w') do |file|
     file.puts "package funcs"
     file.puts 'import "../ds"'
 
-    file.puts 'var Modules = [][]ds.Value {'
+    file.puts 'var Defs = []ds.Value {'
 
-    Builtins.modules.each do |name, info|
-      next unless name.is_a? Symbol
-      file.puts "{"
-      info[:methods].each do |method, id|
-        next unless method.is_a? Symbol
-        file.puts "// #{name}__#{method}: #{info[:id]}"
-        file.puts "GoClosure{Function: #{name}__#{method.to_s.gsub('-', '_')}},"
+    Defs.defs.each do |name, iden|
+      file.puts "// #{iden.value}: #{iden.code}"
+      if iden.just_module? # It's a module literal
+        file.puts "ds.Module{Name: \"#{iden.value}\"},"
+      else
+        file.puts "GoClosure{Function: #{iden.module}__#{iden.var.gsub('-', '_')}},"
       end
-      file.puts '},'
     end
     file.puts '}'
   end

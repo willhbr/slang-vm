@@ -32,11 +32,15 @@ class Identifier
     @module = nil if @module == ''
     @var = sections[-1]
     @location = location
+    @just_module = false
   end
 
-  def set_module(mod_iden)
-    @module = mod_iden.value
-    @code = [mod_iden.code, self.code]
+  def to_module_only!
+    @just_module = true
+    if @module
+      @var = "#{@module}.#{@var}"
+      @module = nil
+    end
   end
 
   def value
@@ -48,7 +52,11 @@ class Identifier
   end
 
   def local?
-    @module == nil
+    @module == nil && !@just_module
+  end
+
+  def just_module?
+    @just_module
   end
 
   def name_and_location

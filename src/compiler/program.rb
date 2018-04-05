@@ -1,3 +1,5 @@
+require_relative './builtins'
+
 class Program
   attr_reader :position
 
@@ -57,6 +59,7 @@ class Program
     strings = self.string_bytes
     bytes = self.bytes
     file.write(strings.pack('C' * strings.size))
+    file.write([ Defs.def_count ].pack('C'))
     file.write(bytes.pack('C' * bytes.size))
   end
 
@@ -67,7 +70,8 @@ end
 
 
 class Code
-  LOAD = 1
+  LOAD_LOCAL = 1
+  LOAD_DEF = 21
   STORE = 2
   CALL_METHOD = 3 # From a module/ method pair
   CALL_LOCAL = 19 # From a register

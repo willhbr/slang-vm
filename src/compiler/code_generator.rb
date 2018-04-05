@@ -33,7 +33,11 @@ class CodeGenerator
       when 'nil'
         push Code.CONST_NIL
       else
-        push Code.LOAD(ast.code)
+        if ast.local?
+          push Code.LOAD_LOCAL(ast.code, ast.value)
+        else
+          push Code.LOAD_DEF(ast.code, ast.value)
+        end
       end
     when String
       code = @program.add_string(ast)      
@@ -62,15 +66,17 @@ class CodeGenerator
           generate(node)
         end
       when 'module'
-        nil
+        name = ast[1]
+        str = @program.add_string(name.value)
+        push Code.CONST_S(str, name.value)
+        push Code.DEFINE(name.code, name.name_and_location)
       when 'def'
         name = ast[1]
         expr = ast[2]
         raise "def name must be identifier" unless name.is_a? Identifier
         raise 'def accepts 2 args' if ast.size > 3
         generate(expr)
-        codes = [name.code[0], name.code[1]]
-        push Code.DEFINE(codes, name.name_and_location)
+        push Code.DEFINE(name.code, name.name_and_location)
       when 'if'
         _, cond, then_block, else_block = ast
         generate(cond)
@@ -97,8 +103,7 @@ class CodeGenerator
         if first.local?
           push Code.CALL_LOCAL(first.code, first.name_and_location)
         else
-          codes = [first.code[0], first.code[1]]
-          push Code.CALL_METHOD(codes, first.name_and_location)
+          push Code.CALL_METHOD(first.code, first.name_and_location)
         end
       end
     else

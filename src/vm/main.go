@@ -67,8 +67,11 @@ func (vm *Coroutine) Run(startIndex int) {
 		fmt.Println(op.ToString(operation))
 		index++
 		switch operation {
-		case op.LOAD:
+		case op.LOAD_LOCAL:
 			vm.Stack.Push(currentFrame.Registers[program[index]])
+			index++
+		case op.LOAD_DEF:
+			vm.Stack.Push(funcs.Defs[program[index]])
 			index++
 		case op.STORE:
 			value := vm.Stack.Pop()
@@ -82,11 +85,9 @@ func (vm *Coroutine) Run(startIndex int) {
 			fmt.Println(value)
 		case op.CALL_METHOD:
 			value := vm.Stack.Pop()
-			module := program[index]
+			id := program[index]
 			index++
-			method := program[index]
-			index++
-			fun := funcs.Modules[module][method]
+			fun := funcs.Defs[id]
 			switch fun.(type) {
 			case funcs.GoClosure:
 				vm.Stack.Push(fun.(funcs.GoClosure).Function(value))
@@ -143,21 +144,20 @@ func (vm *Coroutine) Run(startIndex int) {
 		case op.INSERT:
 			panic("Can't do INSERT yet")
 		case op.DEFINE:
-			module := program[index]
+			id := program[index]
 			index++
-			method := program[index]
-			index++
-			funcs.Modules[module][method] = vm.Stack.Pop()
+			funcs.Defs[int(id)] = vm.Stack.Pop()
 		default:
 			panic(fmt.Errorf("Unknown instruction at %d: %d", index, program[index]))
 		}
 	}
 }
 
-func ParseStrings(instructions []byte) ([]string, int) {
-	count := int(instructions[0])
+func ParseStrings(instructions []byte, position *int) []string {
+	startPosition := *position
+	count := int(instructions[startPosition])
+	startPosition++
 	strings := make([]string, count, count)
-	startPosition := 1
 
 	for index := 0; index < count; index++ {
 		length := int(instructions[startPosition])
@@ -166,7 +166,18 @@ func ParseStrings(instructions []byte) ([]string, int) {
 		strings[index] = string(instructions[startPosition:endPosition])
 		startPosition = endPosition
 	}
-	return strings, startPosition
+	*position = startPosition
+	return strings
+}
+
+func ExpandDefsSlice(instructions []byte, position *int) {
+	size := instructions[*position]
+	*position++
+	defs := make([]ds.Value, int(size), int(size))
+	for i := range funcs.Defs {
+		defs[i] = funcs.Defs[i]
+	}
+	funcs.Defs = defs
 }
 
 func main() {
@@ -176,7 +187,11 @@ func main() {
 		panic(err)
 	}
 	coroutine := NewCoroutine()
-	strings, startIndex := ParseStrings(instructions)
+	startIndex := 0
+	strings := ParseStrings(instructions, &startIndex)
+	ExpandDefsSlice(instructions, &startIndex)
+	fmt.Println(funcs.Defs)
+	fmt.Println(cap(funcs.Defs))
 	prog := Program{Instructions: instructions, Strings: strings}
 	coroutine.Program = &prog
 	coroutine.Run(startIndex)

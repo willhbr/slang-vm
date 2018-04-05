@@ -1,2 +1,7 @@
 (module Foo)
-(def puts 5)
+(def things 5)
+
+(let [things 190]
+  (IO.puts Foo.things)
+  (IO.puts things)
+  (IO.puts Foo))

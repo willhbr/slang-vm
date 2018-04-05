@@ -21,6 +21,8 @@ type GoClosure struct {
 func (g GoClosure) IsBuiltin() bool    { return true }
 func (g SlangClosure) IsBuiltin() bool { return false }
 
+// This is where the stdlib lives
+// The stdlib should always be in the start of the array, so it can be expanded
 //go:generate ruby ../../compiler/builtins.rb ./generated_funcs.go
 
 func IO__puts(argument ds.Value) ds.Value {

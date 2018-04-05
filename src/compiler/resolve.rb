@@ -3,13 +3,8 @@ require_relative './builtins'
 
 class Resolver
   def initialize(defs=Hash.new)
-    @defs = defs
     @next_id = 0
     @current_module = nil
-    @defs.each do |_, iden|
-      @next_id += 1
-      iden.code = @next_id
-    end
   end
 
   def resolve(ast, scopes=[Hash.new])
@@ -25,16 +20,14 @@ class Resolver
       end
       res
     when Identifier
-      if Identifier::KEYWORDS.include? ast.value
+      return if Identifier::KEYWORDS.include? ast.value
+      return if bind_to_local(ast, scopes)
+      if iden = Defs.get?(ast, @current_module.value)
+        ast.code = iden.code
+        ast.to_module_only!
         return
       end
-      if splat = Builtins[ast.module.to_sym, ast.var.to_sym]
-        ast.code = splat
-        return
-      end
-      unless bind_to_previous(ast, scopes)
-        raise "Undefined var: #{ast}"
-      end
+      raise "Undefined var: #{ast.value}"
     else
       ast
     end
@@ -72,14 +65,15 @@ class Resolver
         end
       when 'module'
         first, name = ast
-        set_binding(name, [@defs])
+        name.to_module_only!
+        name.code = Defs.define_module(name)
         @current_module = name
       when 'def'
         first, name, value = ast
         resolve(value, scopes)
         raise 'Cannot define outside of module' unless @current_module
-        name.set_module(@current_module)
-        set_binding(name, [@defs])
+        raise "Cannot define in other module: #{name.mod}" if name.module
+        name.code = Defs.set_and_return(name, @current_module.value)
       when 'fn'
         resolve_fn(ast, scopes)
       else
@@ -90,18 +84,14 @@ class Resolver
     end
   end
 
-  def bind_to_previous(identifier, scopes)
+  def bind_to_local(identifier, scopes)
     scopes.reverse.each do |scope|
       if bound = scope[identifier.value]
         identifier.code = bound.code
         return true
       end
     end
-    if bound = @defs[identifier.value]
-      identifier.code = bound.code
-      return true
-    end
-    raise "Undefined variable: #{identifier.inspect}"
+    return false
   end
 
   def set_binding(identifier, scopes)

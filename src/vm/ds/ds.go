@@ -8,14 +8,27 @@ type Instance struct {
 	Type *Type
 }
 
+type Module struct {
+	Name string
+}
+
+func (m Module) String() string {
+	return m.Name
+}
+
 var intType = Type{name: "Int"}
 var stringType = Type{name: "String"}
 var boolType = Type{name: "Bool"}
+var moduleType = Type{name: "Module"}
+
+var NilType = Type{name: "Nil"}
+var Nil = Instance{Type: &NilType}
+
+type Value interface{}
 
 func GetType(thing interface{}) *Type {
 	// TODO get a type struct for the thing
 	// Fallback on things that are Instances
-	return &Type{name: "Unknown"}
 	switch thing.(type) {
 	case int:
 		return &intType
@@ -25,16 +38,12 @@ func GetType(thing interface{}) *Type {
 		return &boolType
 	case Instance:
 		return thing.(Instance).Type
+	case Module:
+		return &moduleType
 	default:
 		panic("Cannot get type of variable")
 	}
 }
-
-var NilType = Type{name: "Nil"}
-
-var Nil = Instance{Type: &NilType}
-
-type Value interface{}
 
 //go:generate peds -pkg=ds -maps="Map<Value,Value>" -sets="Set<Value>" -vectors="Vector<Value>" -file=generated_collections.go
 
