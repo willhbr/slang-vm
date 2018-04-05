@@ -85,6 +85,7 @@ class Code
   NEW_MAP = 14
   NEW_VECTOR = 15
   NEW_LIST = 16
+  DEFINE = 20
 
   CONS = 17
   INSERT = 18

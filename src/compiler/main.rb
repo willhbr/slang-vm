@@ -22,6 +22,7 @@ tree.map do |node|
   cg.generate(node)
 end
 
+p tree
 puts cg.program
 
 File.open(ARGV[1], 'wb') do |output|

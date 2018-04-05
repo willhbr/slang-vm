@@ -5,6 +5,7 @@ class Resolver
   def initialize(defs=Hash.new)
     @defs = defs
     @next_id = 0
+    @current_module = nil
     @defs.each do |_, iden|
       @next_id += 1
       iden.code = @next_id
@@ -69,9 +70,15 @@ class Resolver
         ast[2..-1].each do |node|
           resolve(node, scopes)
         end
+      when 'module'
+        first, name = ast
+        set_binding(name, [@defs])
+        @current_module = name
       when 'def'
         first, name, value = ast
         resolve(value, scopes)
+        raise 'Cannot define outside of module' unless @current_module
+        name.set_module(@current_module)
         set_binding(name, [@defs])
       when 'fn'
         resolve_fn(ast, scopes)

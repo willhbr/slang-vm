@@ -29,12 +29,22 @@ class Identifier
   def initialize(value, location)
     sections = value.split('.')
     @module = sections[0..-2].join('.')
+    @module = nil if @module == ''
     @var = sections[-1]
     @location = location
   end
 
+  def set_module(mod_iden)
+    @module = mod_iden.value
+    @code = [mod_iden.code, self.code]
+  end
+
   def value
-    @module + '.' + @var
+    if @module
+      @module + '.' + @var
+    else
+      @var
+    end
   end
 
   def local?

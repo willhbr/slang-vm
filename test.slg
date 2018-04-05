@@ -1,1 +1,2 @@
-(IO.puts "Hello!")
+(module Foo)
+(def puts 5)

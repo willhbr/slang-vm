@@ -28,7 +28,7 @@ class CodeGenerator
       case ast.value
       when 'true'
         push Code.CONST_TRUE
-      when 'true'
+      when 'false'
         push Code.CONST_FALSE
       when 'nil'
         push Code.CONST_NIL
@@ -61,8 +61,16 @@ class CodeGenerator
         ast[2..-1].each do |node|
           generate(node)
         end
+      when 'module'
+        nil
       when 'def'
-        raise 'no defs yet'
+        name = ast[1]
+        expr = ast[2]
+        raise "def name must be identifier" unless name.is_a? Identifier
+        raise 'def accepts 2 args' if ast.size > 3
+        generate(expr)
+        codes = [name.code[0], name.code[1]]
+        push Code.DEFINE(codes, name.name_and_location)
       when 'if'
         _, cond, then_block, else_block = ast
         generate(cond)

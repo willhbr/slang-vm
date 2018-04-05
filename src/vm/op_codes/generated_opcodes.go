@@ -16,6 +16,7 @@ RETURN = 13
 NEW_MAP = 14
 NEW_VECTOR = 15
 NEW_LIST = 16
+DEFINE = 20
 CONS = 17
 INSERT = 18
 )
@@ -38,6 +39,7 @@ case RETURN: return "RETURN"
 case NEW_MAP: return "NEW_MAP"
 case NEW_VECTOR: return "NEW_VECTOR"
 case NEW_LIST: return "NEW_LIST"
+case DEFINE: return "DEFINE"
 case CONS: return "CONS"
 case INSERT: return "INSERT"
 default: return "UNKNOWN"
