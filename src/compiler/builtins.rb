@@ -56,7 +56,7 @@ if __FILE__==$0
     file.puts "package funcs"
     file.puts 'import "../ds"'
 
-    file.puts 'var Modules = [][]func(ds.Value) ds.Value{'
+    file.puts 'var Modules = [][]ds.Value {'
 
     Builtins.modules.each do |name, info|
       next unless name.is_a? Symbol
@@ -64,7 +64,7 @@ if __FILE__==$0
       info[:methods].each do |method, id|
         next unless method.is_a? Symbol
         file.puts "// #{name}__#{method}: #{info[:id]}"
-        file.puts "#{name}__#{method.to_s.gsub('-', '_')},"
+        file.puts "GoClosure{Function: #{name}__#{method.to_s.gsub('-', '_')}},"
       end
       file.puts '},'
     end

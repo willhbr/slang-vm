@@ -87,7 +87,14 @@ func (vm *Coroutine) Run(startIndex int) {
 			method := program[index]
 			index++
 			fun := funcs.Modules[module][method]
-			vm.Stack.Push(fun(value))
+			switch fun.(type) {
+			case funcs.GoClosure:
+				vm.Stack.Push(fun.(funcs.GoClosure).Function(value))
+			case funcs.SlangClosure:
+				panic("Can't do that yet")
+			default:
+				panic("Can't call a non-function")
+			}
 		case op.APPLY:
 			panic("Can't do APPLY yet")
 		case op.CONST_I:
@@ -135,6 +142,12 @@ func (vm *Coroutine) Run(startIndex int) {
 			panic("Can't do CONS yet")
 		case op.INSERT:
 			panic("Can't do INSERT yet")
+		case op.DEFINE:
+			module := program[index]
+			index++
+			method := program[index]
+			index++
+			funcs.Modules[module][method] = vm.Stack.Pop()
 		default:
 			panic(fmt.Errorf("Unknown instruction at %d: %d", index, program[index]))
 		}
