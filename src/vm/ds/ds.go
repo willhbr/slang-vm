@@ -4,6 +4,10 @@ type Type struct {
 	name string
 }
 
+func (t Type) String() string {
+	return t.name
+}
+
 type Instance struct {
 	Type *Type
 }

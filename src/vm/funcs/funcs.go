@@ -29,3 +29,7 @@ func IO__puts(argument ds.Value) ds.Value {
 	fmt.Println(argument)
 	return ds.Nil
 }
+
+func Kernel__type(argument ds.Value) ds.Value {
+	return ds.GetType(argument)
+}

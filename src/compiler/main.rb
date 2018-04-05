@@ -9,12 +9,10 @@ scanner = Scanner.new filename, File.read(filename)
 tokens = scanner.read
 tree = Parser.new(tokens).program
 
-res = Resolver.new({
-  "print" => Identifier.new("print", [0, 0]),
-})
+res = Resolver.new()
 
 tree.map do |node|
-  res.resolve(node)
+  res.resolve_top_level(node)
 end
 
 cg = CodeGenerator.new

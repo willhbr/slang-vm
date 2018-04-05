@@ -1,7 +1,6 @@
 (module Foo)
 (def things 5)
 
-(let [things 190]
-  (IO.puts Foo.things)
-  (IO.puts things)
-  (IO.puts Foo))
+(let [things "Hello!"]
+  (IO.puts (Kernel.type things))
+  (IO.puts (Kernel.type Foo.things)))

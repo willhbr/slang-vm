@@ -68,6 +68,7 @@ class CodeGenerator
       when 'module'
         name = ast[1]
         str = @program.add_string(name.value)
+        # TODO make this do a module
         push Code.CONST_S(str, name.value)
         push Code.DEFINE(name.code, name.name_and_location)
       when 'def'

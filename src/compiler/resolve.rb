@@ -7,12 +7,18 @@ class Resolver
     @current_module = nil
   end
 
-  def resolve(ast, scopes=[Hash.new])
+  def resolve_top_level(ast)
+    resolve(ast, [Hash.new], true)
+  end
+
+  private
+
+  def resolve(ast, scopes=[Hash.new], top_level=false)
     case ast
     when Vector
       ast.map { |node| resolve(node, scopes) }
     when Array
-      resolve_call(ast, scopes)
+      resolve_call(ast, scopes, top_level)
     when Hash
       res = Hash.new
       ast.each do |k, v|
@@ -46,7 +52,7 @@ class Resolver
     end
   end
 
-  def resolve_call(ast, scopes)
+  def resolve_call(ast, scopes, top_level=false)
     first = ast.first
     return unless first
     if first.is_a? Identifier
@@ -64,23 +70,30 @@ class Resolver
           resolve(node, scopes)
         end
       when 'module'
+        raise "Can only define module at top-level" unless top_level
         first, name = ast
         name.to_module_only!
         name.code = Defs.define_module(name)
         @current_module = name
       when 'def'
+        raise "Can only def at top-level" unless top_level
         first, name, value = ast
         resolve(value, scopes)
         raise 'Cannot define outside of module' unless @current_module
         raise "Cannot define in other module: #{name.mod}" if name.module
+        if iden = Defs.get?(name, @current_module.value)
+          raise "Already defined #{name.value} on @{iden.location}"
+        end
         name.code = Defs.set_and_return(name, @current_module.value)
       when 'fn'
         resolve_fn(ast, scopes)
+      when 'do'
+        ast[1..-1].each { |node| resolve_fn(node, scopes, top_level) }
       else
-        ast.map { |node| resolve(node, scopes) }
+        ast.each { |node| resolve(node, scopes) }
       end
     else
-      ast.map { |node| resolve(node, scopes) }
+      ast.each { |node| resolve(node, scopes) }
     end
   end
 
