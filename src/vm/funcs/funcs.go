@@ -33,6 +33,9 @@ func IO__puts(arguments ...ds.Value) ds.Value {
 	return ds.Nil
 }
 
-func Kernel__type(argument ...ds.Value) ds.Value {
-	return ds.GetType(argument)
+func Kernel__type(arguments ...ds.Value) ds.Value {
+	if len(arguments) != 1 {
+		panic("Too many arguments to Kernel.type")
+	}
+	return ds.GetType(arguments[0])
 }

@@ -39,7 +39,7 @@ class Scanner
         if token = next_token
           tokens.push token
         end
-      rescue Exception => e
+      rescue ExpectedEOF
         break
       end
     end
@@ -78,7 +78,7 @@ class Scanner
     when '}'
       return sym(:"}")
     when ':'
-      iden = identifier("")
+      iden = identifier
       return sym(:ATOM, iden)
     when ' ', "\t", ','
       return nil

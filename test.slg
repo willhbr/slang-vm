@@ -1,7 +1,4 @@
-(module Foo)
+(module Main)
 
-(def func (fn [a b c]
-  (IO.puts "foo")))
 
-(func)
-(IO.puts "Hello")
+(IO.puts (Kernel.type :foo))

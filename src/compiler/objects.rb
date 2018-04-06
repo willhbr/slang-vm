@@ -75,6 +75,7 @@ class Identifier
 end
 
 class Atom
+  attr_accessor :code
   attr_accessor :value
   attr_accessor :kw_arg
 

@@ -28,6 +28,7 @@ class Resolver
     when Identifier
       return if Identifier::KEYWORDS.include? ast.value
       return if bind_to_local(ast, scopes)
+      raise "No module defined!" unless @current_module
       if iden = Defs.get?(ast, @current_module.value)
         ast.code = iden.code
         ast.to_module_only!

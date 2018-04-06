@@ -44,6 +44,9 @@ class CodeGenerator
       push Code.CONST_S(code, ast)
     when Integer
       push Code.CONST_I(ast)
+    when Atom
+      code = @program.add_string(ast.value)
+      push Code.CONST_A(code, ast.value)
     end
   end
 

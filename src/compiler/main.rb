@@ -20,7 +20,6 @@ tree.map do |node|
   cg.generate(node)
 end
 
-p tree
 cg.program.print
 
 File.open(ARGV[1], 'wb') do |output|

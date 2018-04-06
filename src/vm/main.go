@@ -107,6 +107,10 @@ func (vm *Coroutine) Run(startIndex int) {
 			}
 		case op.APPLY:
 			panic("Can't do APPLY yet")
+		case op.CONST_A:
+			value := program[index]
+			index++
+			vm.Stack.Push(ds.Atom(value))
 		case op.CONST_I:
 			value := program[index]
 			index++
@@ -131,9 +135,6 @@ func (vm *Coroutine) Run(startIndex int) {
 			index++
 			if vm.Stack.Pop() != 0 {
 				index += int(increase)
-				if index >= size {
-					break
-				}
 			}
 		case op.OR:
 			panic("Can't do OR yet")

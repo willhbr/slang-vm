@@ -1,25 +1,26 @@
 package op_codes
 const (LOAD_LOCAL = 1
-LOAD_DEF = 21
-STORE = 2
-INVOKE = 3
-APPLY = 4
-CONST_I = 5
-CONST_S = 6
-CONST_TRUE = 7
-CONST_FALSE = 8
-CONST_NIL = 9
-JUMP = 10
-AND = 11
-OR = 12
-RETURN = 13
-CLOSURE = 22
-NEW_MAP = 14
-NEW_VECTOR = 15
-NEW_LIST = 16
+LOAD_DEF = 2
+STORE = 3
+INVOKE = 4
+APPLY = 5
+CONST_I = 6
+CONST_S = 7
+CONST_A = 8
+CONST_TRUE = 9
+CONST_FALSE = 10
+CONST_NIL = 11
+JUMP = 12
+AND = 13
+OR = 14
+RETURN = 15
+CLOSURE = 16
+NEW_MAP = 17
+NEW_VECTOR = 18
+NEW_LIST = 19
 DEFINE = 20
-CONS = 17
-INSERT = 18
+CONS = 21
+INSERT = 22
 )
 func ToString(code byte) string {
 switch code {
@@ -30,6 +31,7 @@ case INVOKE: return "INVOKE"
 case APPLY: return "APPLY"
 case CONST_I: return "CONST_I"
 case CONST_S: return "CONST_S"
+case CONST_A: return "CONST_A"
 case CONST_TRUE: return "CONST_TRUE"
 case CONST_FALSE: return "CONST_FALSE"
 case CONST_NIL: return "CONST_NIL"

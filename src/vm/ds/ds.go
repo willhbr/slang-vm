@@ -16,6 +16,8 @@ type Module struct {
 	Name string
 }
 
+type Atom int
+
 func (m Module) String() string {
 	return m.Name
 }
@@ -24,6 +26,7 @@ var intType = Type{name: "Int"}
 var stringType = Type{name: "String"}
 var boolType = Type{name: "Bool"}
 var moduleType = Type{name: "Module"}
+var atomType = Type{name: "Atom"}
 
 var NilType = Type{name: "Nil"}
 var Nil = Instance{Type: &NilType}
@@ -44,6 +47,8 @@ func GetType(thing interface{}) *Type {
 		return thing.(Instance).Type
 	case Module:
 		return &moduleType
+	case Atom:
+		return &atomType
 	default:
 		panic("Cannot get type of variable")
 	}
