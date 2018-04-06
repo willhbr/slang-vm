@@ -2,8 +2,7 @@ package op_codes
 const (LOAD_LOCAL = 1
 LOAD_DEF = 21
 STORE = 2
-CALL_METHOD = 3
-CALL_LOCAL = 19
+INVOKE = 3
 APPLY = 4
 CONST_I = 5
 CONST_S = 6
@@ -14,6 +13,7 @@ JUMP = 10
 AND = 11
 OR = 12
 RETURN = 13
+CLOSURE = 22
 NEW_MAP = 14
 NEW_VECTOR = 15
 NEW_LIST = 16
@@ -26,8 +26,7 @@ switch code {
 case LOAD_LOCAL: return "LOAD_LOCAL"
 case LOAD_DEF: return "LOAD_DEF"
 case STORE: return "STORE"
-case CALL_METHOD: return "CALL_METHOD"
-case CALL_LOCAL: return "CALL_LOCAL"
+case INVOKE: return "INVOKE"
 case APPLY: return "APPLY"
 case CONST_I: return "CONST_I"
 case CONST_S: return "CONST_S"
@@ -38,6 +37,7 @@ case JUMP: return "JUMP"
 case AND: return "AND"
 case OR: return "OR"
 case RETURN: return "RETURN"
+case CLOSURE: return "CLOSURE"
 case NEW_MAP: return "NEW_MAP"
 case NEW_VECTOR: return "NEW_VECTOR"
 case NEW_LIST: return "NEW_LIST"

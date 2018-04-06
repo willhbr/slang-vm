@@ -82,7 +82,7 @@ class Resolver
         raise 'Cannot define outside of module' unless @current_module
         raise "Cannot define in other module: #{name.mod}" if name.module
         if iden = Defs.get?(name, @current_module.value)
-          raise "Already defined #{name.value} on @{iden.location}"
+          raise "Already defined #{name.value} on #{iden.location}"
         end
         name.code = Defs.set_and_return(name, @current_module.value)
       when 'fn'

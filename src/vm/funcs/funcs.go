@@ -15,7 +15,7 @@ type SlangClosure struct {
 }
 
 type GoClosure struct {
-	Function func(ds.Value) ds.Value
+	Function func(...ds.Value) ds.Value
 }
 
 func (g GoClosure) IsBuiltin() bool    { return true }
@@ -25,11 +25,14 @@ func (g SlangClosure) IsBuiltin() bool { return false }
 // The stdlib should always be in the start of the array, so it can be expanded
 //go:generate ruby ../../compiler/builtins.rb ./generated_funcs.go
 
-func IO__puts(argument ds.Value) ds.Value {
-	fmt.Println(argument)
+func IO__puts(arguments ...ds.Value) ds.Value {
+	for i := range arguments {
+		fmt.Print(arguments[i])
+	}
+	fmt.Println()
 	return ds.Nil
 }
 
-func Kernel__type(argument ds.Value) ds.Value {
+func Kernel__type(argument ...ds.Value) ds.Value {
 	return ds.GetType(argument)
 }

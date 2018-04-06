@@ -10,11 +10,17 @@ import (
 )
 
 type Frame struct {
-	Registers []ds.Value
+	Registers     []ds.Value
+	CallingFrame  *Frame
+	ContinueIndex int
 }
 
 func NewFrame() *Frame {
-	return &Frame{Registers: make([]ds.Value, 100, 100)}
+	return &Frame{Registers: make([]ds.Value, 100, 100), CallingFrame: nil, ContinueIndex: 0}
+}
+
+func NewFrameFrom(calling *Frame) *Frame {
+	return &Frame{Registers: make([]ds.Value, 100, 100), CallingFrame: calling, ContinueIndex: 0}
 }
 
 type Stack struct {
@@ -64,7 +70,7 @@ func (vm *Coroutine) Run(startIndex int) {
 	currentFrame := vm.CurrentFrame
 	for index < size {
 		operation := program[index]
-		fmt.Println(op.ToString(operation))
+		// fmt.Println(op.ToString(operation))
 		index++
 		switch operation {
 		case op.LOAD_LOCAL:
@@ -78,21 +84,24 @@ func (vm *Coroutine) Run(startIndex int) {
 			register := program[index]
 			currentFrame.Registers[register] = value
 			index++
-		case op.CALL_LOCAL:
-			value := vm.Stack.Pop()
-			// This will be the ID of the func to call, but not yet
+		case op.INVOKE:
+			fun := vm.Stack.Pop()
+			arg_count := int(program[index])
 			index++
-			fmt.Println(value)
-		case op.CALL_METHOD:
-			value := vm.Stack.Pop()
-			id := program[index]
-			index++
-			fun := funcs.Defs[id]
+			arguments := make([]ds.Value, arg_count, arg_count)
+			for i := range arguments {
+				arguments[i] = vm.Stack.Pop()
+			}
 			switch fun.(type) {
 			case funcs.GoClosure:
-				vm.Stack.Push(fun.(funcs.GoClosure).Function(value))
+				result := fun.(funcs.GoClosure).Function(arguments...)
+				vm.Stack.Push(result)
 			case funcs.SlangClosure:
-				panic("Can't do that yet")
+				closure := fun.(funcs.SlangClosure)
+				currentFrame.ContinueIndex = index
+				index = int(closure.ProgramPosition)
+				currentFrame = NewFrameFrom(currentFrame)
+				// TODO Pass arguments and whatnot
 			default:
 				panic("Can't call a non-function")
 			}
@@ -129,7 +138,10 @@ func (vm *Coroutine) Run(startIndex int) {
 		case op.OR:
 			panic("Can't do OR yet")
 		case op.RETURN:
-			panic("Can't do RETURN yet")
+			value := vm.Stack.Pop()
+			currentFrame = currentFrame.CallingFrame
+			index = currentFrame.ContinueIndex
+			vm.Stack.Push(value)
 		case op.NEW_MAP:
 			m := ds.NewMap()
 			vm.Stack.Push(m)
@@ -147,6 +159,10 @@ func (vm *Coroutine) Run(startIndex int) {
 			id := program[index]
 			index++
 			funcs.Defs[int(id)] = vm.Stack.Pop()
+		case op.CLOSURE:
+			start := uint(program[index])
+			index++
+			vm.Stack.Push(funcs.SlangClosure{ProgramPosition: start, IsProtocolMethod: false})
 		default:
 			panic(fmt.Errorf("Unknown instruction at %d: %d", index, program[index]))
 		}
@@ -191,8 +207,7 @@ func main() {
 	strings := ParseStrings(instructions, &startIndex)
 	ExpandDefsSlice(instructions, &startIndex)
 	fmt.Println(funcs.Defs)
-	fmt.Println(cap(funcs.Defs))
-	prog := Program{Instructions: instructions, Strings: strings}
+	prog := Program{Instructions: instructions[startIndex:], Strings: strings}
 	coroutine.Program = &prog
-	coroutine.Run(startIndex)
+	coroutine.Run(0)
 }

@@ -21,7 +21,7 @@ tree.map do |node|
 end
 
 p tree
-puts cg.program
+cg.program.print
 
 File.open(ARGV[1], 'wb') do |output|
   cg.program.write_to(output)

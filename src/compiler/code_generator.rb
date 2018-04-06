@@ -78,6 +78,19 @@ class CodeGenerator
         raise 'def accepts 2 args' if ast.size > 3
         generate(expr)
         push Code.DEFINE(name.code, name.name_and_location)
+      when 'fn'
+        jump = Code.JUMP(-1)
+        push jump
+        pos = @program.position
+        # TODO Do something with args
+        # args = ast[1]
+        body = ast[2..-1]
+        body.each do |node|
+          generate(node)
+        end
+        push Code.RETURN
+        jump.args[0] = @program.position - pos
+        push Code.CLOSURE(pos)
       when 'if'
         _, cond, then_block, else_block = ast
         generate(cond)
@@ -101,11 +114,9 @@ class CodeGenerator
         ast[1..-1].each do |arg|
           generate(arg)
         end
-        if first.local?
-          push Code.CALL_LOCAL(first.code, first.name_and_location)
-        else
-          push Code.CALL_METHOD(first.code, first.name_and_location)
-        end
+        generate(ast[0])
+        # This is the arg count
+        push Code.INVOKE(ast.size - 1)
       end
     else
       ast.each do |arg|

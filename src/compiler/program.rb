@@ -63,8 +63,12 @@ class Program
     file.write(bytes.pack('C' * bytes.size))
   end
 
-  def to_s
-    @buffer.map(&:to_s).join("\n")
+  def print
+    pos = 0
+    @buffer.each do |code|
+      puts code.to_s pos
+      pos += code.size
+    end
   end
 end
 
@@ -73,8 +77,7 @@ class Code
   LOAD_LOCAL = 1
   LOAD_DEF = 21
   STORE = 2
-  CALL_METHOD = 3 # From a module/ method pair
-  CALL_LOCAL = 19 # From a register
+  INVOKE = 3
   APPLY = 4
   CONST_I = 5
   CONST_S = 6
@@ -85,6 +88,7 @@ class Code
   AND = 11
   OR = 12
   RETURN = 13
+  CLOSURE = 22
   # ===
   NEW_MAP = 14
   NEW_VECTOR = 15
@@ -124,14 +128,14 @@ class Code
     end
   end
 
-  def to_s
+  def to_s(pos='')
     name = self.class.stringify(@code)
     if @debug
       args = @args.zip(@debug).map { |a, d| "#{d || '?'} (#{a})" }.join("\t")
     else
       args = @args.join("\t")
     end
-    '%12s %s' % [name, args]
+    '%4s %11s %s' % [pos.to_s, name, args]
   end
 
   def self.stringify(code)
