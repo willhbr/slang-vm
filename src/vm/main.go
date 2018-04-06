@@ -42,7 +42,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 			}
 			switch fun.(type) {
 			case funcs.GoClosure:
-				result := fun.(funcs.GoClosure).Function(arguments...)
+				result := fun.(funcs.GoClosure).Function(co, arguments...)
 				co.Stack.Push(result)
 			case funcs.SlangClosure:
 				closure := fun.(funcs.SlangClosure)

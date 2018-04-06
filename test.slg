@@ -1,4 +1,4 @@
 (module Main)
 
 
-(IO.puts (Kernel.type :foo))
+(IO.puts :foo)
