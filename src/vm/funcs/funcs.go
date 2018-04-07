@@ -17,6 +17,14 @@ type SlangClosure struct {
 	Registers []ds.Value
 }
 
+func NewSlangClosure(position uint) SlangClosure {
+	return SlangClosure{
+		ProgramPosition:  position,
+		IsProtocolMethod: false,
+		Registers:        make([]ds.Value, 100, 100),
+	}
+}
+
 type GoClosure struct {
 	Function func(*vm.Coroutine, ...ds.Value) ds.Value
 }

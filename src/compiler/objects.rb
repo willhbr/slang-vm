@@ -1,3 +1,14 @@
+class ClosureArgs
+  attr_accessor :vars
+
+  def initialize(vars)
+    @vars = vars
+  end
+
+  def inspect
+    '&[' + @vars.map(&:inspect).join(' ') + ']'
+  end
+end
 
 class Vector < Array
   def inspect
@@ -67,7 +78,7 @@ class Identifier
 
 
   def inspect
-    if KEYWORDS.include? @value
+    if KEYWORDS.include?(@value) || @code.nil?
       value
     else
       "#{value}_#{@code}"

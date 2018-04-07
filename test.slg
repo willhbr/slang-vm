@@ -1,7 +1,10 @@
 (module Main)
 
-(def func
-(fn [a]
-  (IO.puts a)))
+(let [bar 98
+      captured (fn [a]
+        (IO.puts a bar))
+      uncaptured (fn [a b]
+        (IO.puts a b))]
+  (captured 5)
+  (IO.puts (uncaptured 9 5)))
 
-(func 18)

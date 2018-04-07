@@ -91,15 +91,25 @@ class CodeGenerator
         jump = Code.JUMP(-1)
         push jump
         pos = @program.position
-        # TODO Do something with args
-        # args = ast[1]
+        args = ast[1]
+        captured = args.pop
+        args.reverse.each do |arg|
+          push Code.STORE(arg.code, arg.value)
+        end
+
         body = ast[2..-1]
         body.each do |node|
           generate(node)
         end
         push Code.RETURN
         jump.args[0] = @program.position - pos
-        push Code.CLOSURE(pos)
+        closure_args = [pos, captured.vars.length]
+        debug = [nil, nil]
+        captured.vars.each do |iden|
+          closure_args << iden.code
+          debug << iden.value
+        end
+        push Code.CLOSURE(closure_args, debug)
       when 'if'
         _, cond, then_block, else_block = ast
         generate(cond)
@@ -128,8 +138,9 @@ class CodeGenerator
           generate(arg)
         end
         generate(ast[0])
-        # This is the arg count
-        push Code.INVOKE(ast.size - 1)
+        # Minus one for function name
+        arg_count = ast.size - 1
+        push Code.INVOKE(arg_count, ast[0].is_a?(Identifier) ? ast[0].value : nil)
       end
     else
       ast.each do |arg|

@@ -13,6 +13,7 @@ res = Resolver.new()
 
 tree.map do |node|
   res.resolve_top_level(node)
+  p node
 end
 
 cg = CodeGenerator.new

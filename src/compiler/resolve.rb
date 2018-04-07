@@ -20,10 +20,12 @@ class Resolver
   def initialize(defs=Hash.new)
     @next_id = 0
     @current_module = nil
+    @on_local_bind = []
     @state = ResolverState.new
   end
 
   def resolve_top_level(ast)
+    @next_id = 0
     resolve(ast, true)
   end
 
@@ -59,14 +61,25 @@ class Resolver
   def resolve_fn(ast)
     @state.rescope do
       args = ast[1]
+      outside_code = @next_id
       raise "Args must be vector, not #{args.class} #{ast[0].location}" unless args.is_a? Vector
       args.each do |arg|
         raise "Arg must be identifier: #{arg}" unless arg.is_a? Identifier
         set_binding(arg)
       end
+      captured = []
+      # This is a hackety hack
+      @on_local_bind << lambda do |iden|
+        if iden.code < outside_code
+          captured << iden
+        end
+      end
+      args.push(ClosureArgs.new captured)
       ast[2..-1].each do |expr|
         resolve(expr)
       end
+      p captured
+      @on_local_bind.pop
     end
   end
 
@@ -120,6 +133,9 @@ class Resolver
     @state.scopes.reverse.each do |scope|
       if bound = scope[identifier.value]
         identifier.code = bound.code
+        @on_local_bind.each do |func|
+          func.(identifier)
+        end
         return true
       end
     end
@@ -127,8 +143,8 @@ class Resolver
   end
 
   def set_binding(identifier)
-    @next_id += 1
     identifier.code = @next_id
+    @next_id += 1
     @state.scopes[-1][identifier.value] = identifier
   end
 end

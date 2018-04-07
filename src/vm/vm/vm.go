@@ -2,6 +2,7 @@ package vm
 
 import (
 	"../ds"
+	"fmt"
 )
 
 type Frame struct {
@@ -20,6 +21,10 @@ func NewFrameFrom(calling *Frame) *Frame {
 
 type Stack struct {
 	values *[]ds.Value
+}
+
+func (s Stack) String() string {
+	return fmt.Sprintf("%+v", *s.values)
 }
 
 func (s *Stack) Pop() ds.Value {

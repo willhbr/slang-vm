@@ -18,7 +18,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 	currentFrame := co.CurrentFrame
 	for index < size {
 		operation := program[index]
-		fmt.Println(op.ToString(operation))
+		// fmt.Println(op.ToString(operation))
 		index++
 		switch operation {
 		case op.LOAD_LOCAL:
@@ -50,7 +50,9 @@ func Run(co *vm.Coroutine, startIndex int) {
 				currentFrame.ContinueIndex = index
 				index = int(closure.ProgramPosition)
 				currentFrame = vm.NewFrameFrom(currentFrame)
-				// TODO Pass arguments and whatnot
+				for i, value := range closure.Registers {
+					currentFrame.Registers[i] = value
+				}
 			default:
 				panic("Can't call a non-function")
 			}
@@ -96,10 +98,8 @@ func Run(co *vm.Coroutine, startIndex int) {
 		case op.OR:
 			panic("Can't do OR yet")
 		case op.RETURN:
-			value := co.Stack.Pop()
 			currentFrame = currentFrame.CallingFrame
 			index = currentFrame.ContinueIndex
-			co.Stack.Push(value)
 		case op.NEW_MAP:
 			m := ds.NewMap()
 			co.Stack.Push(m)
@@ -120,7 +120,15 @@ func Run(co *vm.Coroutine, startIndex int) {
 		case op.CLOSURE:
 			start := uint(program[index])
 			index++
-			co.Stack.Push(funcs.SlangClosure{ProgramPosition: start, IsProtocolMethod: false})
+			capturedCount := int(program[index])
+			index++
+			closure := funcs.NewSlangClosure(start)
+			endAt := index + capturedCount
+			for ; index < endAt; index++ {
+				register := int(program[index])
+				closure.Registers[register] = currentFrame.Registers[register]
+			}
+			co.Stack.Push(closure)
 		default:
 			panic(fmt.Errorf("Unknown instruction at %d: %d", index, program[index]))
 		}

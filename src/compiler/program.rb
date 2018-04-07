@@ -131,7 +131,7 @@ class Code
   def to_s(pos='')
     name = self.class.stringify(@code)
     if @debug
-      args = @args.zip(@debug).map { |a, d| "#{d || '?'} (#{a})" }.join("\t")
+      args = @args.zip(@debug).map { |a, d| "#{a}: #{d || '?'}" }.join("\t")
     else
       args = @args.join("\t")
     end

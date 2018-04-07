@@ -34,8 +34,6 @@ var Nil = Instance{Type: &NilType}
 type Value interface{}
 
 func GetType(thing interface{}) *Type {
-	// TODO get a type struct for the thing
-	// Fallback on things that are Instances
 	switch thing.(type) {
 	case int:
 		return &intType
