@@ -5,4 +5,4 @@
     acc
     (recur (Kernel.- n 1) (Kernel.* n acc)))))
 
-(IO.puts (fact 30 1))
+(IO.puts (fact 15 1))

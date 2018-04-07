@@ -81,7 +81,6 @@ class Resolver
       ast[2..-1].each do |expr|
         resolve(expr)
       end
-      p captured
       @on_local_bind.pop
     end
     @state.in_func -= 1
@@ -105,6 +104,14 @@ class Resolver
             resolve(node)
           end
         end
+      when 'alias'
+        raise 'cannot alias outside module' unless @current_module
+        mod = ast[1]
+        raise 'Can only alias modules' unless mod.is_a? Identifier
+        resolve(mod)
+        alias_to = ast[2]
+        raise 'Can only alias modules' if alias_to && !mod.is_a?(Identifier)
+        Defs.alias(@current_module, mod, alias_to)
       when 'module'
         raise "Can only define module at top-level" unless top_level
         first, name = ast

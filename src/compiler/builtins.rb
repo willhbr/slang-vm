@@ -21,7 +21,8 @@ class Builtins
 end
 
 class Defs
-  @@defs = Hash.new
+  @@defs = Hash.new { |h, k| h[k] = Hash.new }
+
   @@next_code = 0
   def self.defs
     @@defs
@@ -31,12 +32,19 @@ class Defs
     @@next_code
   end
 
+  def self.alias(current, from, to)
+    @@defs[current] = @@defs[]
+  end
+
   def self.get?(identifier, mod=nil)
-    if mod && (in_this = @@defs[mod + '.' + identifier.value])
-      return in_this
-    end
-    if iden = @@defs[identifier.value]
-      return iden
+    if identifier.module
+      if r = @@defs[identifier.module][identifier.var]
+        return r
+      end
+    else
+      if r = @@defs[mod][identifier.var]
+        return r
+      end
     end
     raise "Unknown module for #{identifier.value} (have you declared a module?)" unless mod
     nil
@@ -45,11 +53,11 @@ class Defs
   def self.set_and_return(identifier, mod=nil)
     identifier.module ||= mod
     raise "Unknown module for #{identifier.value} (have you declared a module?)" unless identifier.module
-    if iden = @@defs[identifier.value]
+    if iden = @@defs[identifier.module][identifier.var]
       identifier.code = iden.code
     else
       identifier.code = @@next_code
-      @@defs[identifier.value] = identifier
+      @@defs[identifier.module][identifier.var] = identifier
       @@next_code += 1
     end
     identifier.code
@@ -57,11 +65,11 @@ class Defs
 
   def self.define_module(identifier)
     identifier.to_module_only!
-    if iden = @@defs[identifier.value]
+    if iden = @@defs[identifier.var][:__MODULE__]
       identifier.code = iden.code
     else
       identifier.code = @@next_code
-      @@defs[identifier.value] = identifier
+      @@defs[identifier.var][:__MODULE__] = identifier
       @@next_code += 1
     end
     identifier.code
@@ -93,11 +101,13 @@ if __FILE__==$0
     file.puts 'import "../ds"'
     file.puts 'var Defs = []ds.Value {'
 
-    Defs.defs.each do |name, iden|
-      file.puts "// #{iden.value}: #{iden.code}"
-      if iden.just_module? # It's a module literal
-        file.puts "ds.Module{Name: \"#{iden.value}\"},"
-      else
+    Defs.defs.each do |mod, defs|
+      module_identifier = defs[:__MODULE__]
+      file.puts "// #{mod}: #{module_identifier.code}"
+      file.puts "ds.Module{Name: \"#{module_identifier.value}\"},"
+      defs.each do |name, iden|
+        next if name == :__MODULE__
+        file.puts "// #{iden.value}: #{iden.code}"
         file.puts "GoClosure{Function: #{iden.module}__#{to_go_name(iden.var)}},"
       end
     end
