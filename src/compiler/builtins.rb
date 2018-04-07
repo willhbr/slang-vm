@@ -1,5 +1,22 @@
 require_relative './objects'
 
+class Builtins
+  MODULES = {
+    IO: [
+      :puts,
+      :gets
+    ],
+    Kernel: [
+      :type
+    ],
+    Channel: [
+      :new,
+      :send,
+      :receive
+    ]
+  }
+end
+
 class Defs
   @@defs = Hash.new
   @@next_code = 0
@@ -48,23 +65,6 @@ class Defs
   end
 end
 
-class Builtins
-  MODULES = {
-    IO: [
-      :puts,
-      :gets
-    ],
-    Kernel: [
-      :type
-    ],
-    Channel: [
-      :new,
-      :send,
-      :receive
-    ]
-  }
-end
-
 Builtins::MODULES.sort.each do |name, methods|
   Defs.define_module(Identifier.new(name.to_s, [nil, nil]))
   methods.sort.each do |method|
@@ -76,7 +76,6 @@ if __FILE__==$0
   File.open(ARGV[0], 'w') do |file|
     file.puts "package funcs"
     file.puts 'import "../ds"'
-
     file.puts 'var Defs = []ds.Value {'
 
     Defs.defs.each do |name, iden|
