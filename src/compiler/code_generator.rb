@@ -7,6 +7,11 @@ class CodeGenerator
     @program = Program.new
   end
 
+  def generate_top_level(ast)
+    @func_recur_points = []
+    generate(ast)
+  end
+
   def generate(ast)
     case ast
     when Vector
@@ -87,10 +92,17 @@ class CodeGenerator
         idx = @program.position
         generate(ast[1])
         spawn.args[0] = @program.position - idx
+      when 'recur'
+        ast[1..-1].each do |expr|
+          generate(expr)
+        end
+        # Extra two for the two instructions pushed
+        push Code.JUMP_BACK(@program.position - @func_recur_points[-1] + 2)
       when 'fn'
         jump = Code.JUMP(-1)
         push jump
         pos = @program.position
+        @func_recur_points << pos
         args = ast[1]
         captured = args.pop
         args.reverse.each do |arg|
@@ -101,6 +113,7 @@ class CodeGenerator
         body.each do |node|
           generate(node)
         end
+        @func_recur_points.pop
         push Code.RETURN
         jump.args[0] = @program.position - pos
         closure_args = [pos, captured.vars.length]

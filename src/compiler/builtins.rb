@@ -7,7 +7,10 @@ class Builtins
       :gets
     ],
     Kernel: [
-      :type
+      :type,
+      :<,
+      :-,
+      :*
     ],
     Channel: [
       :new,
@@ -72,6 +75,18 @@ Builtins::MODULES.sort.each do |name, methods|
   end
 end
 
+def to_go_name(str)
+  {
+    '->' => 'arrow',
+    '<-' => 'reverseArrow',
+    '<' => 'lessThan',
+    '-' => 'minus',
+    '*' => 'times'
+  }.reduce str do |str, replace|
+    str.gsub(*replace)
+  end
+end
+
 if __FILE__==$0
   File.open(ARGV[0], 'w') do |file|
     file.puts "package funcs"
@@ -83,7 +98,7 @@ if __FILE__==$0
       if iden.just_module? # It's a module literal
         file.puts "ds.Module{Name: \"#{iden.value}\"},"
       else
-        file.puts "GoClosure{Function: #{iden.module}__#{iden.var.gsub('-', '_')}},"
+        file.puts "GoClosure{Function: #{iden.module}__#{to_go_name(iden.var)}},"
       end
     end
     file.puts '}'

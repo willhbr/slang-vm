@@ -1,6 +1,8 @@
 (module Main)
 
+(def fact (fn [n acc]
+  (if (Kernel.< n 1)
+    acc
+    (recur (Kernel.- n 1) (Kernel.* n acc)))))
 
-(let [input (IO.gets)]
-  (IO.puts "result:" input))
-
+(IO.puts (fact 30 1))

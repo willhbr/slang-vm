@@ -30,6 +30,7 @@ class Identifier
 
   KEYWORDS = [
     'let',
+    'if',
     'def',
     'fn',
     'true',

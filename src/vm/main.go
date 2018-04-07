@@ -89,14 +89,17 @@ func Run(co *vm.Coroutine, startIndex int) {
 			increase := int(program[index])
 			index++
 			index += increase
+		case op.JUMP_BACK:
+			decrease := int(program[index])
+			index++
+			index -= decrease
 		case op.AND:
 			increase := program[index]
 			index++
-			if co.Stack.Pop() != 0 {
+			cond := co.Stack.Pop()
+			if cond != true {
 				index += int(increase)
 			}
-		case op.OR:
-			panic("Can't do OR yet")
 		case op.RETURN:
 			currentFrame = currentFrame.CallingFrame
 			index = currentFrame.ContinueIndex

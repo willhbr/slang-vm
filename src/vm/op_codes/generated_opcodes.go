@@ -11,8 +11,8 @@ CONST_TRUE = 9
 CONST_FALSE = 10
 CONST_NIL = 11
 JUMP = 12
-AND = 13
-OR = 14
+JUMP_BACK = 13
+AND = 14
 RETURN = 15
 CLOSURE = 16
 NEW_MAP = 17
@@ -37,8 +37,8 @@ case CONST_TRUE: return "CONST_TRUE"
 case CONST_FALSE: return "CONST_FALSE"
 case CONST_NIL: return "CONST_NIL"
 case JUMP: return "JUMP"
+case JUMP_BACK: return "JUMP_BACK"
 case AND: return "AND"
-case OR: return "OR"
 case RETURN: return "RETURN"
 case CLOSURE: return "CLOSURE"
 case NEW_MAP: return "NEW_MAP"

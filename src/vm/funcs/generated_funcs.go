@@ -17,6 +17,12 @@ GoClosure{Function: IO__gets},
 GoClosure{Function: IO__puts},
 // Kernel: 7
 ds.Module{Name: "Kernel"},
-// Kernel.type: 8
+// Kernel.*: 8
+GoClosure{Function: Kernel__times},
+// Kernel.-: 9
+GoClosure{Function: Kernel__minus},
+// Kernel.<: 10
+GoClosure{Function: Kernel__lessThan},
+// Kernel.type: 11
 GoClosure{Function: Kernel__type},
 }

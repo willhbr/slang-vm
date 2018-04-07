@@ -17,7 +17,7 @@ end
 
 cg = CodeGenerator.new
 tree.map do |node|
-  cg.generate(node)
+  cg.generate_top_level(node)
 end
 
 cg.program.print

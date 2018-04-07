@@ -11,3 +11,15 @@ func Kernel__type(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
 	}
 	return ds.GetType(arguments[0])
 }
+
+func Kernel__minus(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
+	return arguments[0].(int) - arguments[1].(int)
+}
+
+func Kernel__lessThan(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
+	return arguments[0].(int) < arguments[1].(int)
+}
+
+func Kernel__times(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
+	return arguments[0].(int) * arguments[1].(int)
+}

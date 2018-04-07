@@ -3,9 +3,12 @@ require_relative './builtins'
 
 class ResolverState
   attr_accessor :scopes
+  attr_accessor :in_func
+
   def initialize
     @scopes = [ Hash.new ]
     @top_level = true
+    @in_func = 0
   end
 
   def rescope(&block)
@@ -44,7 +47,6 @@ class Resolver
       end
       res
     when Identifier
-      return if Identifier::KEYWORDS.include? ast.value
       return if bind_to_local(ast)
       raise "No module defined!" unless @current_module
       if iden = Defs.get?(ast, @current_module.value)
@@ -59,6 +61,7 @@ class Resolver
   end
 
   def resolve_fn(ast)
+    @state.in_func += 1
     @state.rescope do
       args = ast[1]
       outside_code = @next_id
@@ -81,6 +84,7 @@ class Resolver
       p captured
       @on_local_bind.pop
     end
+    @state.in_func -= 1
   end
 
   def resolve_call(ast, top_level=false)
@@ -117,12 +121,22 @@ class Resolver
           raise "Already defined #{name.value} on #{iden.location}"
         end
         name.code = Defs.set_and_return(name, @current_module.value)
+      when 'recur'
+        if @state.in_func != 0
+          ast[1..-1].each { |node| resolve(node, top_level) }
+        else
+          raise "Can't recur outside function"
+        end
       when 'fn'
         resolve_fn(ast)
       when 'do'
         ast[1..-1].each { |node| resolve(node, top_level) }
       else
-        ast.each { |node| resolve(node) }
+        if Identifier::KEYWORDS.include? first.value
+          ast[1..-1].each { |node| resolve(node) }
+        else
+          ast.each { |node| resolve(node) }
+        end
       end
     else
       ast.each { |node| resolve(node) }

@@ -86,8 +86,8 @@ class Code
   CONST_FALSE = 10
   CONST_NIL = 11
   JUMP = 12
-  AND = 13
-  OR = 14
+  JUMP_BACK = 13
+  AND = 14
   RETURN = 15
   CLOSURE = 16
   NEW_MAP = 17

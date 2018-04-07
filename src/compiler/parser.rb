@@ -132,6 +132,12 @@ class Scanner
     return @contents[start..@index - 1]
   end
 
+  def comment
+    advance! while peek? != "\n"
+    @column = 1
+    @line += 1
+  end
+
   def is_iden_start(char)
     'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm!@#$%^&*-_=+\|:?/,<>.'.include? char
   end
