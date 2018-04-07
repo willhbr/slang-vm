@@ -1,10 +1,6 @@
 (module Main)
 
-(let [bar 98
-      captured (fn [a]
-        (IO.puts a bar))
-      uncaptured (fn [a b]
-        (IO.puts a b))]
-  (captured 5)
-  (IO.puts (uncaptured 9 5)))
+
+(let [input (IO.gets)]
+  (IO.puts "result:" input))
 

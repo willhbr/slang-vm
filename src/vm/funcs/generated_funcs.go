@@ -11,10 +11,12 @@ GoClosure{Function: Channel__receive},
 GoClosure{Function: Channel__send},
 // IO: 4
 ds.Module{Name: "IO"},
-// IO.puts: 5
+// IO.gets: 5
+GoClosure{Function: IO__gets},
+// IO.puts: 6
 GoClosure{Function: IO__puts},
-// Kernel: 6
+// Kernel: 7
 ds.Module{Name: "Kernel"},
-// Kernel.type: 7
+// Kernel.type: 8
 GoClosure{Function: Kernel__type},
 }

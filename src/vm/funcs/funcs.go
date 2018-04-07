@@ -3,7 +3,9 @@ package funcs
 import (
 	"../ds"
 	"../vm"
+	"bufio"
 	"fmt"
+	"os"
 )
 
 type Closure interface {
@@ -49,6 +51,12 @@ func IO__puts(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
 	}
 	fmt.Println()
 	return ds.Nil
+}
+
+func IO__gets(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	return text
 }
 
 func Kernel__type(co *vm.Coroutine, arguments ...ds.Value) ds.Value {

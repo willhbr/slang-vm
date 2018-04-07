@@ -52,6 +52,7 @@ class Builtins
   MODULES = {
     IO: [
       :puts,
+      :gets
     ],
     Kernel: [
       :type
