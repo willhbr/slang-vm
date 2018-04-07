@@ -36,13 +36,13 @@ func Run(co *vm.Coroutine, startIndex int) {
 			fun := co.Stack.Pop()
 			arg_count := int(program[index])
 			index++
-			arguments := make([]ds.Value, arg_count, arg_count)
-			size := len(arguments)
-			for i := size - 1; i >= 0; i-- {
-				arguments[i] = co.Stack.Pop()
-			}
 			switch fun.(type) {
 			case funcs.GoClosure:
+				arguments := make([]ds.Value, arg_count, arg_count)
+				size := len(arguments)
+				for i := size - 1; i >= 0; i-- {
+					arguments[i] = co.Stack.Pop()
+				}
 				result := fun.(funcs.GoClosure).Function(co, arguments...)
 				co.Stack.Push(result)
 			case funcs.SlangClosure:
@@ -50,9 +50,6 @@ func Run(co *vm.Coroutine, startIndex int) {
 				currentFrame.ContinueIndex = index
 				index = int(closure.ProgramPosition)
 				currentFrame = vm.NewFrameFrom(currentFrame)
-				for i, value := range closure.Registers {
-					currentFrame.Registers[i] = value
-				}
 				// TODO Pass arguments and whatnot
 			default:
 				panic("Can't call a non-function")
