@@ -23,7 +23,8 @@ class Identifier
     'fn',
     'true',
     'false',
-    'nil'
+    'nil',
+    'spawn'
   ]
 
   def initialize(value, location)

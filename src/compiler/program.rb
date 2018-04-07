@@ -96,6 +96,7 @@ class Code
   DEFINE = 20
   CONS = 21
   INSERT = 22
+  SPAWN = 23
 
   CODE_VALUES = Hash.new
   CODE_NAMES = Hash.new

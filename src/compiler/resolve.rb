@@ -59,7 +59,7 @@ class Resolver
   def resolve_fn(ast)
     @state.rescope do
       args = ast[1]
-      raise "Args must be vector, not #{args.class}" unless args.is_a? Vector
+      raise "Args must be vector, not #{args.class} #{ast[0].location}" unless args.is_a? Vector
       args.each do |arg|
         raise "Arg must be identifier: #{arg}" unless arg.is_a? Identifier
         set_binding(arg)
@@ -107,7 +107,7 @@ class Resolver
       when 'fn'
         resolve_fn(ast)
       when 'do'
-        ast[1..-1].each { |node| resolve_fn(node) }
+        ast[1..-1].each { |node| resolve(node, top_level) }
       else
         ast.each { |node| resolve(node) }
       end

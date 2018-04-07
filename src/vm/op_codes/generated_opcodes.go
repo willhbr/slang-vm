@@ -21,6 +21,7 @@ NEW_LIST = 19
 DEFINE = 20
 CONS = 21
 INSERT = 22
+SPAWN = 23
 )
 func ToString(code byte) string {
 switch code {
@@ -46,5 +47,6 @@ case NEW_LIST: return "NEW_LIST"
 case DEFINE: return "DEFINE"
 case CONS: return "CONS"
 case INSERT: return "INSERT"
+case SPAWN: return "SPAWN"
 default: return "UNKNOWN"
 }}

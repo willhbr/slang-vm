@@ -55,6 +55,11 @@ class Builtins
     ],
     Kernel: [
       :type
+    ],
+    Channel: [
+      :new,
+      :send,
+      :receive
     ]
   }
 end

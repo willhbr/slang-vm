@@ -18,7 +18,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 	currentFrame := co.CurrentFrame
 	for index < size {
 		operation := program[index]
-		// fmt.Println(op.ToString(operation))
+		fmt.Println(op.ToString(operation))
 		index++
 		switch operation {
 		case op.LOAD_LOCAL:
@@ -37,7 +37,8 @@ func Run(co *vm.Coroutine, startIndex int) {
 			arg_count := int(program[index])
 			index++
 			arguments := make([]ds.Value, arg_count, arg_count)
-			for i := range arguments {
+			size := len(arguments)
+			for i := size - 1; i >= 0; i-- {
 				arguments[i] = co.Stack.Pop()
 			}
 			switch fun.(type) {
@@ -49,10 +50,21 @@ func Run(co *vm.Coroutine, startIndex int) {
 				currentFrame.ContinueIndex = index
 				index = int(closure.ProgramPosition)
 				currentFrame = vm.NewFrameFrom(currentFrame)
+				for i, value := range closure.Registers {
+					currentFrame.Registers[i] = value
+				}
 				// TODO Pass arguments and whatnot
 			default:
 				panic("Can't call a non-function")
 			}
+		case op.SPAWN:
+			skip := program[index]
+			index++
+			continueIndex := index
+			index += int(skip)
+			newCo := vm.NewCoroutine()
+			newCo.Program = co.Program
+			go Run(newCo, int(continueIndex))
 		case op.APPLY:
 			panic("Can't do APPLY yet")
 		case op.CONST_A:

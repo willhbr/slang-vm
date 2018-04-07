@@ -1,4 +1,11 @@
 (module Main)
 
+(let [foo 5
+      chan (Channel.new)]
+  (spawn
+    (do
+      (IO.puts foo)
+      (Channel.send chan nil))
+  (IO.puts foo)
+  (Channel.receive chan)))
 
-(IO.puts :foo)

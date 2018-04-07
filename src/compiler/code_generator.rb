@@ -81,6 +81,12 @@ class CodeGenerator
         raise 'def accepts 2 args' if ast.size > 3
         generate(expr)
         push Code.DEFINE(name.code, name.name_and_location)
+      when 'spawn'
+        spawn = Code.SPAWN(-1)
+        push spawn
+        idx = @program.position
+        generate(ast[1])
+        spawn.args[0] = @program.position - idx
       when 'fn'
         jump = Code.JUMP(-1)
         push jump
@@ -112,6 +118,10 @@ class CodeGenerator
         else
           # jump to end of if
           jump.args[0] = @program.position - start
+        end
+      when 'do'
+        ast[1..-1].each do |arg|
+          generate(arg)
         end
       else
         ast[1..-1].each do |arg|
