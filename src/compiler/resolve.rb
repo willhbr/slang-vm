@@ -51,8 +51,6 @@ class Resolver
       raise "No module defined!" unless @current_module
       return if Defs.get_module?(@current_module, ast)
       return if Defs.get_module_def?(@current_module, ast)
-      require 'pry'
-      binding.pry
       raise "Undefined var: #{ast.whole} #{ast.location}"
     else
       ast

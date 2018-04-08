@@ -49,24 +49,26 @@ class Defs
   end
 
   def self.get_module?(current, identifier)
-    defs = @@defs[identifier.whole]
-    if defs
-      return defs[:__MODULE__]
-    end
+    defs = lookup_module_defs(current, identifier.whole)
+    return unless defs
+    mod = defs[:__MODULE__]
+    identifier.code = mod.code
+    identifier.make_global!
+    mod
+  end
+
+  def self.lookup_module_defs(current, name)
+    defs = @@defs[name]
+    return defs if defs
     defs = @@defs[current.whole]
-    aliased_mod = defs[:__ALIAS__][identifier.whole]
-    if aliased_mod
-      mod = aliased_mod[:__MODULE__]
-      identifier.code = mod.code
-      identifier.make_global!
-      mod
-    end
+    aliased_mod = defs[:__ALIAS__][name]
+    return aliased_mod if aliased_mod
   end
 
   def self.get_module_def?(current, identifier)
     mod, var = identifier.parts
     mod = current.whole if mod.nil?
-    defs = @@defs[mod]
+    defs = lookup_module_defs current, mod
     return unless defs
     if v = defs[var]
       identifier.code = v.code

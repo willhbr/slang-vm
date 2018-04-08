@@ -1,5 +1,6 @@
 (module Main)
 (alias Channel Ch)
+(alias Main Butts)
 (import Kernel)
 
 (IO.puts Ch)
@@ -9,4 +10,4 @@
     acc
     (recur (- n 1) (* n acc)))))
 
-(IO.puts (fact 15 1))
+(IO.puts (Butts.fact 15 1))
