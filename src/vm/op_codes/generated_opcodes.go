@@ -5,6 +5,7 @@ STORE = 3
 INVOKE = 4
 APPLY = 5
 CONST_I = 6
+CONST_I_BIG = 24
 CONST_S = 7
 CONST_A = 8
 CONST_TRUE = 9
@@ -31,6 +32,7 @@ case STORE: return "STORE"
 case INVOKE: return "INVOKE"
 case APPLY: return "APPLY"
 case CONST_I: return "CONST_I"
+case CONST_I_BIG: return "CONST_I_BIG"
 case CONST_S: return "CONST_S"
 case CONST_A: return "CONST_A"
 case CONST_TRUE: return "CONST_TRUE"

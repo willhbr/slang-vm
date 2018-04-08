@@ -1,5 +1,15 @@
 package ds
 
+import "math/big"
+
+func NewInt64(value int64) Value {
+	return big.NewInt(value)
+}
+
+func NewInt(value uint8) Value {
+	return big.NewInt(int64(value))
+}
+
 type Type struct {
 	name string
 }

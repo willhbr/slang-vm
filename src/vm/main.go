@@ -73,7 +73,18 @@ func Run(co *vm.Coroutine, startIndex int) {
 		case op.CONST_I:
 			value := program[index]
 			index++
-			co.Stack.Push(ds.Value(int(value)))
+			co.Stack.Push(ds.NewInt(value))
+		case op.CONST_I_BIG:
+			var value int64
+			var read int64
+			value = 0
+			end := index + 8
+			for ; index < end; index++ {
+				read = int64(program[index])
+				value = value | read
+				value = value << 8
+			}
+			co.Stack.Push(ds.NewInt64(value))
 		case op.CONST_S:
 			idx := program[index]
 			index++

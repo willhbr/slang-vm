@@ -80,6 +80,7 @@ class Code
   INVOKE = 4
   APPLY = 5
   CONST_I = 6
+  CONST_I_BIG = 24
   CONST_S = 7
   CONST_A = 8
   CONST_TRUE = 9

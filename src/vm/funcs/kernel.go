@@ -3,6 +3,7 @@ package funcs
 import (
 	"../ds"
 	"../vm"
+	"math/big"
 )
 
 func Kernel__type(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
@@ -13,13 +14,17 @@ func Kernel__type(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
 }
 
 func Kernel__minus(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
-	return arguments[0].(int) - arguments[1].(int)
+	result := big.Int{}
+	result.Sub(arguments[0].(*big.Int), arguments[1].(*big.Int))
+	return &result
 }
 
 func Kernel__lessThan(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
-	return arguments[0].(int) < arguments[1].(int)
+	return arguments[0].(*big.Int).Cmp(arguments[1].(*big.Int)) == -1
 }
 
 func Kernel__times(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
-	return arguments[0].(int) * arguments[1].(int)
+	result := big.Int{}
+	result.Mul(arguments[0].(*big.Int), arguments[1].(*big.Int))
+	return &result
 }

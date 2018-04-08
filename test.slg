@@ -1,13 +1,9 @@
 (module Main)
-(alias Channel Ch)
-(alias Main Butts)
 (import Kernel)
-
-(IO.puts Ch)
 
 (def fact (fn [n acc]
   (if (< n 1)
     acc
     (recur (- n 1) (* n acc)))))
 
-(IO.puts (Butts.fact 15 1))
+(IO.puts (fact 258 1))

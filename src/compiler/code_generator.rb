@@ -48,7 +48,13 @@ class CodeGenerator
       code = @program.add_string(ast)      
       push Code.CONST_S(code, ast)
     when Integer
-      push Code.CONST_I(ast)
+      if ast > 255 || ast < 0
+        # Encode as big endian, 64-bit (8 bytes) signed
+        # TODO do this in a non-shitty way
+        push Code.CONST_I_BIG([ ast ].pack('Q>').split('').map(&:ord), ast.to_s)
+      else
+        push Code.CONST_I(ast)
+      end
     when Atom
       code = @program.add_string(ast.whole)
       push Code.CONST_A(code, ast.whole)
