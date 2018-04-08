@@ -30,7 +30,7 @@ class CodeGenerator
         push Code.INSERT
       end
     when Identifier
-      case ast.value
+      case ast.whole
       when 'true'
         push Code.CONST_TRUE
       when 'false'
@@ -39,9 +39,9 @@ class CodeGenerator
         push Code.CONST_NIL
       else
         if ast.local?
-          push Code.LOAD_LOCAL(ast.code, ast.value)
+          push Code.LOAD_LOCAL(ast.code, ast.whole)
         else
-          push Code.LOAD_DEF(ast.code, ast.value)
+          push Code.LOAD_DEF(ast.code, ast.whole)
         end
       end
     when String
@@ -50,8 +50,8 @@ class CodeGenerator
     when Integer
       push Code.CONST_I(ast)
     when Atom
-      code = @program.add_string(ast.value)
-      push Code.CONST_A(code, ast.value)
+      code = @program.add_string(ast.whole)
+      push Code.CONST_A(code, ast.whole)
     end
   end
 
@@ -61,7 +61,7 @@ class CodeGenerator
       push Code.NEW_LIST
     end
     if first.is_a? Identifier
-      case first.value
+      case first.whole
       when 'let'
         binds = ast[1]
         binds.each_slice(2) do |slice|
@@ -73,11 +73,13 @@ class CodeGenerator
         ast[2..-1].each do |node|
           generate(node)
         end
+      when 'alias', 'import'
+        return
       when 'module'
         name = ast[1]
-        str = @program.add_string(name.value)
+        str = @program.add_string(name.whole)
         # TODO make this do a module
-        push Code.CONST_S(str, name.value)
+        push Code.CONST_S(str, name.whole)
         push Code.DEFINE(name.code, name.name_and_location)
       when 'def'
         name = ast[1]
@@ -106,7 +108,7 @@ class CodeGenerator
         args = ast[1]
         captured = args.pop
         args.reverse.each do |arg|
-          push Code.STORE(arg.code, arg.value)
+          push Code.STORE(arg.code, arg.whole)
         end
 
         body = ast[2..-1]
@@ -120,7 +122,7 @@ class CodeGenerator
         debug = [nil, nil]
         captured.vars.each do |iden|
           closure_args << iden.code
-          debug << iden.value
+          debug << iden.whole
         end
         push Code.CLOSURE(closure_args, debug)
       when 'if'
@@ -153,7 +155,7 @@ class CodeGenerator
         generate(ast[0])
         # Minus one for function name
         arg_count = ast.size - 1
-        push Code.INVOKE(arg_count, ast[0].is_a?(Identifier) ? ast[0].value : nil)
+        push Code.INVOKE(arg_count, ast[0].is_a?(Identifier) ? ast[0].whole : nil)
       end
     else
       ast.each do |arg|

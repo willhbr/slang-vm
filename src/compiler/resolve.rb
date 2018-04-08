@@ -49,12 +49,11 @@ class Resolver
     when Identifier
       return if bind_to_local(ast)
       raise "No module defined!" unless @current_module
-      if iden = Defs.get?(ast, @current_module.value)
-        ast.code = iden.code
-        ast.to_module_only!
-        return
-      end
-      raise "Undefined var: #{ast.value}"
+      return if Defs.get_module?(@current_module, ast)
+      return if Defs.get_module_def?(@current_module, ast)
+      require 'pry'
+      binding.pry
+      raise "Undefined var: #{ast.whole} #{ast.location}"
     else
       ast
     end
@@ -90,7 +89,7 @@ class Resolver
     first = ast.first
     return unless first
     if first.is_a? Identifier
-      case first.value
+      case first.whole
       when 'let'
         binds = ast[1]
         @state.rescope do
@@ -110,24 +109,29 @@ class Resolver
         raise 'Can only alias modules' unless mod.is_a? Identifier
         resolve(mod)
         alias_to = ast[2]
-        raise 'Can only alias modules' if alias_to && !mod.is_a?(Identifier)
+        raise 'Can only alias modules' unless alias_to.is_a?(Identifier)
         Defs.alias(@current_module, mod, alias_to)
+      when 'import'
+        raise 'cannot import outside module' unless @current_module
+        mod = ast[1]
+        raise 'Can only alias modules' unless mod.is_a? Identifier
+        resolve(mod)
+        Defs.import(@current_module, mod)
       when 'module'
         raise "Can only define module at top-level" unless top_level
-        first, name = ast
-        name.to_module_only!
-        name.code = Defs.define_module(name)
+        _, name = ast
+        Defs.define_module(name)
         @current_module = name
       when 'def'
         raise "Can only def at top-level" unless top_level
         first, name, value = ast
         resolve(value)
         raise 'Cannot define outside of module' unless @current_module
-        raise "Cannot define in other module: #{name.mod}" if name.module
-        if iden = Defs.get?(name, @current_module.value)
-          raise "Already defined #{name.value} on #{iden.location}"
+        raise "Cannot define in other module: #{name.mod}" unless name.no_module?
+        if Defs.get_module_def?(@current_module, name)
+          raise "Already defined #{name.whole} on #{iden.location}"
         end
-        name.code = Defs.set_and_return(name, @current_module.value)
+        Defs.def_def(@current_module, name)
       when 'recur'
         if @state.in_func != 0
           ast[1..-1].each { |node| resolve(node, top_level) }
@@ -139,7 +143,7 @@ class Resolver
       when 'do'
         ast[1..-1].each { |node| resolve(node, top_level) }
       else
-        if Identifier::KEYWORDS.include? first.value
+        if Identifier::KEYWORDS.include? first.whole
           ast[1..-1].each { |node| resolve(node) }
         else
           ast.each { |node| resolve(node) }
@@ -152,7 +156,7 @@ class Resolver
 
   def bind_to_local(identifier)
     @state.scopes.reverse.each do |scope|
-      if bound = scope[identifier.value]
+      if bound = scope[identifier.whole]
         identifier.code = bound.code
         @on_local_bind.each do |func|
           func.(identifier)
@@ -166,6 +170,6 @@ class Resolver
   def set_binding(identifier)
     identifier.code = @next_id
     @next_id += 1
-    @state.scopes[-1][identifier.value] = identifier
+    @state.scopes[-1][identifier.whole] = identifier
   end
 end

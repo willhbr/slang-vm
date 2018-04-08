@@ -23,8 +23,6 @@ class Array
 end
 
 class Identifier
-  attr_accessor :module
-  attr_accessor :var
   attr_accessor :code
   attr_accessor :location
 
@@ -40,49 +38,66 @@ class Identifier
   ]
 
   def initialize(value, location)
-    sections = value.split('.')
-    @module = sections[0..-2].join('.')
-    @module = nil if @module == ''
-    @var = sections[-1]
+    @value = value
+    @parts = value.split('.')
     @location = location
-    @just_module = false
+    @is_module = @parts.length > 1
   end
 
-  def to_module_only!
-    @just_module = true
-    if @module
-      @var = "#{@module}.#{@var}"
-      @module = nil
-    end
+  def whole
+    @value
   end
 
-  def value
-    if @module
-      @module + '.' + @var
+  def module_part
+    p = @parts[0..-2]
+    if p.empty?
+      nil
     else
-      @var
+      p.join '.'
     end
   end
 
   def local?
-    @module == nil && !@just_module
+    !@is_module
   end
 
-  def just_module?
-    @just_module
+  def global?
+    @is_module
+  end
+
+  # For one-word aliases and whatnot
+  def make_global!
+    @is_module = true
+  end
+
+  def no_module?
+    @parts.size == 1
+  end
+
+  def var_part
+    @parts[-1]
+  end
+
+  def parts
+    [module_part, var_part]
+  end
+
+  def add_module!(mod)
+    @parts.insert(0, mod)
+    @value = "#{mod}.#{@value}"
   end
 
   def name_and_location
     line, col = @location
-    "#{value} [#{line}:#{col}]"
+    "#{@value} [#{line}:#{col}]"
   end
 
 
   def inspect
     if KEYWORDS.include?(@value) || @code.nil?
-      value
+      @value
     else
-      "#{value}_#{@code}"
+      "#{@value}_#{@code}"
     end
   end
 end

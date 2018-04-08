@@ -119,7 +119,7 @@ class Code
     @code = code
     @args = args.is_a?(Array) ? args : [args]
     if @args.any?(&:nil?)
-      raise "No args can be nil"
+      raise "No args can be nil: #{args.inspect} #{debug.inspect}"
     end
     if debug
       @debug = debug.is_a?(Array) ? debug : [debug]
