@@ -23,6 +23,8 @@ GoClosure{Function: Kernel__times},
 GoClosure{Function: Kernel__minus},
 // Kernel.<: 10
 GoClosure{Function: Kernel__lessThan},
-// Kernel.type: 11
+// Kernel.conj: 11
+GoClosure{Function: Kernel__conj},
+// Kernel.type: 12
 GoClosure{Function: Kernel__type},
 }

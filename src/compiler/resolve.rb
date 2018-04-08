@@ -20,7 +20,7 @@ class ResolverState
 end
 
 class Resolver
-  def initialize(defs=Hash.new)
+  def initialize
     @next_id = 0
     @current_module = nil
     @on_local_bind = []

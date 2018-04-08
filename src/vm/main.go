@@ -115,18 +115,29 @@ func Run(co *vm.Coroutine, startIndex int) {
 			currentFrame = currentFrame.CallingFrame
 			index = currentFrame.ContinueIndex
 		case op.NEW_MAP:
-			m := ds.NewMap()
+			count := int(program[index])
+			index++
+			arguments := make([]ds.MapItem, count, count)
+			for i := count - 1; i >= 0; i-- {
+				item := ds.MapItem{}
+				item.Value = co.Stack.Pop()
+				item.Key = co.Stack.Pop()
+				arguments[i] = item
+			}
+			m := ds.NewMap(arguments...)
 			co.Stack.Push(m)
 		case op.NEW_VECTOR:
-			v := ds.NewVector()
+			count := int(program[index])
+			index++
+			arguments := make([]ds.Value, count, count)
+			for i := count - 1; i >= 0; i-- {
+				arguments[i] = co.Stack.Pop()
+			}
+			v := ds.NewVector(arguments...)
 			co.Stack.Push(v)
 		case op.NEW_LIST:
 			l := ds.NewList()
 			co.Stack.Push(l)
-		case op.CONS:
-			panic("Can't do CONS yet")
-		case op.INSERT:
-			panic("Can't do INSERT yet")
 		case op.DEFINE:
 			id := program[index]
 			index++

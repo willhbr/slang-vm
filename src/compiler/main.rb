@@ -9,7 +9,7 @@ scanner = Scanner.new filename, File.read(filename)
 tokens = scanner.read
 tree = Parser.new(tokens).program
 
-res = Resolver.new()
+res = Resolver.new
 
 tree.map do |node|
   res.resolve_top_level(node)

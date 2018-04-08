@@ -1,9 +1,5 @@
 (module Main)
 (import Kernel)
 
-(def fact (fn [n acc]
-  (if (< n 1)
-    acc
-    (recur (- n 1) (* n acc)))))
-
-(IO.puts (fact 258 1))
+(IO.puts {foo: :bar "three" "four"})
+(IO.puts [foo: :bar "three" "four"])

@@ -15,20 +15,18 @@ class CodeGenerator
   def generate(ast)
     case ast
     when Vector
-      push Code.NEW_VECTOR
       ast.each do |node|
         generate(node)
-        push Code.CONS
       end
+      push Code.NEW_VECTOR(ast.size)
     when Array
       generate_call(ast)
     when Hash
-      push Code.NEW_MAP
       ast.each do |key, value|
         generate(key)
         generate(value)
-        push Code.INSERT
       end
+      push Code.NEW_MAP(ast.size)
     when Identifier
       case ast.whole
       when 'true'
@@ -56,8 +54,8 @@ class CodeGenerator
         push Code.CONST_I(ast)
       end
     when Atom
-      code = @program.add_string(ast.whole)
-      push Code.CONST_A(code, ast.whole)
+      code = @program.add_string(ast.value)
+      push Code.CONST_A(code, ast.value)
     end
   end
 

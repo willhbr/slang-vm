@@ -10,7 +10,8 @@ class Builtins
       :type,
       :<,
       :-,
-      :*
+      :*,
+      :conj
     ],
     Channel: [
       :new,
@@ -124,6 +125,17 @@ class Defs
     id = @@next_code
     @@next_code += 1
     id
+  end
+
+  # Get the code for a certain statically-known method
+  def self.[](mod, method)
+    mod = mod.to_s
+    method = method.to_s
+    methods = @@defs[mod]
+    raise "Can't find method #{mod}.#{method}" unless methods
+    iden = methods[method]
+    raise "Can't find method #{mod}.#{method}" unless iden
+    iden.code
   end
 end
 

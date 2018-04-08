@@ -28,3 +28,11 @@ func Kernel__times(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
 	result.Mul(arguments[0].(*big.Int), arguments[1].(*big.Int))
 	return &result
 }
+
+func Kernel__conj(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
+	vec := arguments[0].(*ds.Vector)
+	for i := 1; i < len(arguments); i++ {
+		vec = vec.Append(arguments[i])
+	}
+	return vec
+}

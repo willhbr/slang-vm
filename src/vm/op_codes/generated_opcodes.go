@@ -5,24 +5,22 @@ STORE = 3
 INVOKE = 4
 APPLY = 5
 CONST_I = 6
-CONST_I_BIG = 24
-CONST_S = 7
-CONST_A = 8
-CONST_TRUE = 9
-CONST_FALSE = 10
-CONST_NIL = 11
-JUMP = 12
-JUMP_BACK = 13
-AND = 14
-RETURN = 15
-CLOSURE = 16
-NEW_MAP = 17
-NEW_VECTOR = 18
-NEW_LIST = 19
-DEFINE = 20
-CONS = 21
-INSERT = 22
-SPAWN = 23
+CONST_I_BIG = 7
+CONST_S = 8
+CONST_A = 9
+CONST_TRUE = 10
+CONST_FALSE = 11
+CONST_NIL = 12
+JUMP = 13
+JUMP_BACK = 14
+AND = 15
+RETURN = 16
+CLOSURE = 17
+NEW_MAP = 18
+NEW_VECTOR = 19
+NEW_LIST = 20
+DEFINE = 21
+SPAWN = 22
 )
 func ToString(code byte) string {
 switch code {
@@ -47,8 +45,6 @@ case NEW_MAP: return "NEW_MAP"
 case NEW_VECTOR: return "NEW_VECTOR"
 case NEW_LIST: return "NEW_LIST"
 case DEFINE: return "DEFINE"
-case CONS: return "CONS"
-case INSERT: return "INSERT"
 case SPAWN: return "SPAWN"
 default: return "UNKNOWN"
 }}
