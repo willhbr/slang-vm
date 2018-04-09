@@ -74,13 +74,13 @@ class Defs
     if v = defs[var]
       identifier.code = v.code
       identifier.make_global!
-      return v
+      return v, defs[:__MODULE__]
     end
     defs[:__IMPORTS__].each do |imported_defs|
       if v = imported_defs[var]
         identifier.code = v.code
         identifier.make_global!
-        return v
+        return v, imported_defs[:__MODULE__]
       end
     end
     nil

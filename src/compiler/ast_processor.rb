@@ -1,10 +1,15 @@
 module ASTProcessor
   def process_top_level(ast)
     reset()
-    process(ast, true)
+    res = process(ast, true)
+    done_statement(ast)
+    res
   end
 
   def reset
+  end
+
+  def done_statement(ast)
   end
 
   private

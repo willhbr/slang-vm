@@ -5,10 +5,20 @@ require_relative './ast_processor'
 class DefResolver
   include ASTProcessor
 
+  attr_reader :modules
+  attr_reader :module_useage
+
   def initialize
     @current_module = nil
+    @modules = Hash.new
+    @current_list = nil
+    @module_useage = Hash.new
   end
 
+  def done_statement(ast)
+    @current_list << ast
+  end
+ 
   def process_other(ast, top_level)
     passthrough_nested(ast)
   end
@@ -17,8 +27,15 @@ class DefResolver
     return if Identifier::KEYWORDS.include? ast.whole
     return unless ast.code.nil?
     raise "No module defined!" unless @current_module
-    return if Defs.get_module?(@current_module, ast)
-    return if Defs.get_module_def?(@current_module, ast)
+    if Defs.get_module?(@current_module, ast)
+      use! ast
+      return
+    end
+    if splat = Defs.get_module_def?(@current_module, ast)
+      d, mod = splat
+      use! mod
+      return
+    end
     raise "Undefined var: #{ast.whole} #{ast.location}"
   end
 
@@ -49,6 +66,7 @@ class DefResolver
         _, name = ast
         check_unbound! name
         Defs.define_module(name)
+        define! name
         @current_module = name
       when 'def'
         raise "Can only def at top-level" unless top_level
@@ -71,6 +89,16 @@ class DefResolver
     else
       ast.each { |node| process(node) }
     end
+  end
+
+  def define!(mod)
+    @current_list = (@modules[mod.whole] ||= [])
+    @current_useage = (@module_useage[mod.whole] ||= [])
+  end
+
+  def use!(other_mod)
+    return if other_mod.code == @current_module.code
+    @current_useage << other_mod.whole unless @current_useage.include? other_mod.whole
   end
 
   def check_unbound!(iden)

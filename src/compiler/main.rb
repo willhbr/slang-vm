@@ -5,39 +5,43 @@ require_relative './program'
 require_relative './parser'
 require_relative './code_generator'
 require_relative './macro_expander'
+require_relative './dag_order'
 
-filename = ARGV[0]
-scanner = Scanner.new filename, File.read(filename)
-tokens = scanner.read
-tree = Parser.new(tokens).program
+def read_file(filename)
+  scanner = Scanner.new filename, File.read(filename)
+  tokens = scanner.read
+  Parser.new(tokens).program
+end
 
 bad_macro_expander = MacroExpander.new
+local = LocalResolver.new
+global = DefResolver.new
+code_gen = CodeGenerator.new
 
-tree = tree.map do |node|
-  bad_macro_expander.process_top_level(node)
+
+ARGV[1..-1].each do |path|
+  tree = read_file(path)
+  tree = tree.map do |node|
+    bad_macro_expander.process_top_level(node)
+  end
+
+  tree.each do |node|
+    local.process_top_level(node)
+  end
+
+  tree.each do |node|
+    global.process_top_level(node)
+  end
 end
 
-res = LocalResolver.new
-tree.each do |node|
-  res.process_top_level(node)
+ordered = DAGOrder.order(global.modules, global.module_useage)
+
+ordered.map do |node|
+  code_gen.process_top_level(node)
 end
 
-p tree
+code_gen.program.print
 
-res = DefResolver.new
-tree.each do |node|
-  res.process_top_level(node)
-end
-
-p tree
-
-cg = CodeGenerator.new
-tree.map do |node|
-  cg.process_top_level(node)
-end
-
-cg.program.print
-
-File.open(ARGV[1], 'wb') do |output|
-  cg.program.write_to(output)
+File.open(ARGV[0], 'wb') do |output|
+  code_gen.program.write_to(output)
 end
