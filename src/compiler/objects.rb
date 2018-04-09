@@ -37,6 +37,10 @@ class Identifier
     'spawn'
   ]
 
+  def self.from(other, new_value)
+    new(new_value, other.location)
+  end
+
   def initialize(value, location)
     @value = value
     @parts = value.split('.')

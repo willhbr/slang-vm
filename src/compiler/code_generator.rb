@@ -162,10 +162,11 @@ class CodeGenerator
         push Code.INVOKE(arg_count, ast[0].is_a?(Identifier) ? ast[0].whole : nil)
       end
     else
+      puts "Woops: #{ast.inspect}"
       ast.each do |arg|
         generate(arg)
       end
-      push Code.DISPATCH(-1, 'apply')
+      push Code.INVOKE(-1, 'apply')
     end
   end
 

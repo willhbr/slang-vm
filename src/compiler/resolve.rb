@@ -47,6 +47,7 @@ class Resolver
       end
       res
     when Identifier
+      return if Identifier::KEYWORDS.include? ast.whole
       return if bind_to_local(ast)
       raise "No module defined!" unless @current_module
       return if Defs.get_module?(@current_module, ast)

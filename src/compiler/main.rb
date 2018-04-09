@@ -3,17 +3,26 @@ require_relative './objects'
 require_relative './program'
 require_relative './parser'
 require_relative './code_generator'
+require_relative './macro_expander'
 
 filename = ARGV[0]
 scanner = Scanner.new filename, File.read(filename)
 tokens = scanner.read
 tree = Parser.new(tokens).program
 
+bad_macro_expander = MacroExpander.new
+
+tree = tree.map do |node|
+  bad_macro_expander.expand_top_level(node)
+end
+
 res = Resolver.new
 
-tree.map do |node|
+tree.each do |node|
   res.resolve_top_level(node)
 end
+
+p tree
 
 cg = CodeGenerator.new
 tree.map do |node|

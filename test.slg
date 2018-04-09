@@ -1,5 +1,13 @@
 (module Main)
 (import Kernel)
 
-(IO.puts {foo: :bar "three" "four"})
-(IO.puts [foo: :bar "three" "four"])
+
+(defn foo [a b]
+  (- a b))
+
+(->> 3
+  (foo 4)
+  IO.puts)
+
+(unless true
+  (IO.puts (foo 1 2)))
