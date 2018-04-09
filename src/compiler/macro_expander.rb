@@ -1,7 +1,10 @@
 require_relative './objects'
 require_relative './builtins'
+require_relative './ast_processor'
 
 class MacroExpander
+  include ASTProcessor
+
   MACROS = {
     defn: lambda do |ast|
       d, name, args = ast
@@ -40,32 +43,7 @@ class MacroExpander
     end
   end
 
-  def expand_top_level(ast)
-    expand(ast)
-  end
-
-  private
-
-  def expand(ast)
-    case ast
-    when Vector
-      Vector.new ast.map { |node| expand(node) }
-    when Array
-      expand_call(ast)
-    when Hash
-      res = Hash.new
-      ast.each do |k, v|
-        res[expand(k)] = expand(v)
-      end
-      res
-    when Identifier
-      ast
-    else
-      ast
-    end
-  end
-
-  def expand_call(ast)
+  def process_array(ast, top_level)
     first = ast.first
     return unless first
     if first.is_a? Identifier
@@ -73,6 +51,10 @@ class MacroExpander
         return macro.(ast)
       end
     end
-    ast.map { |node| expand(node) }
+    ast.map { |node| process(node) }
+  end
+
+  def process_other(ast, top_level)
+    passthrough_nested(ast)
   end
 end

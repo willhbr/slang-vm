@@ -13,20 +13,20 @@ tree = Parser.new(tokens).program
 bad_macro_expander = MacroExpander.new
 
 tree = tree.map do |node|
-  bad_macro_expander.expand_top_level(node)
+  bad_macro_expander.process_top_level(node)
 end
 
 res = Resolver.new
 
 tree.each do |node|
-  res.resolve_top_level(node)
+  res.process_top_level(node)
 end
 
 p tree
 
 cg = CodeGenerator.new
 tree.map do |node|
-  cg.generate_top_level(node)
+  cg.process_top_level(node)
 end
 
 cg.program.print

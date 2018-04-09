@@ -1,65 +1,76 @@
 require_relative './objects'
 require_relative './program'
+require_relative './ast_processor'
 
 class CodeGenerator
+  include ASTProcessor
+
   attr_reader :program
   def initialize
     @program = Program.new
   end
 
-  def generate_top_level(ast)
+  def reset
     @func_recur_points = []
-    generate(ast)
   end
 
-  def generate(ast)
-    case ast
-    when Vector
-      ast.each do |node|
-        generate(node)
-      end
-      push Code.NEW_VECTOR(ast.size)
-    when Array
-      generate_call(ast)
-    when Hash
-      ast.each do |key, value|
-        generate(key)
-        generate(value)
-      end
-      push Code.NEW_MAP(ast.size)
-    when Identifier
-      case ast.whole
-      when 'true'
-        push Code.CONST_TRUE
-      when 'false'
-        push Code.CONST_FALSE
-      when 'nil'
-        push Code.CONST_NIL
+  def process_vector(ast, top_level)
+    ast.each do |node|
+      process(node)
+    end
+    push Code.NEW_VECTOR(ast.size)
+  end
+
+  def process_array(ast, top_level)
+    generate_call(ast)
+  end
+
+  def process_hash(ast, top_level)
+    ast.each do |key, value|
+      process(key)
+      process(value)
+    end
+    push Code.NEW_MAP(ast.size)
+  end
+
+  def process_identifier(ast, top_level)
+    case ast.whole
+    when 'true'
+      push Code.CONST_TRUE
+    when 'false'
+      push Code.CONST_FALSE
+    when 'nil'
+      push Code.CONST_NIL
+    else
+      if ast.local?
+        push Code.LOAD_LOCAL(ast.code, ast.whole)
       else
-        if ast.local?
-          push Code.LOAD_LOCAL(ast.code, ast.whole)
-        else
-          push Code.LOAD_DEF(ast.code, ast.whole)
-        end
+        push Code.LOAD_DEF(ast.code, ast.whole)
       end
-    when String
-      code = @program.add_string(ast)      
-      push Code.CONST_S(code, ast)
-    when Integer
-      if ast > 255 || ast < 0
-        # Encode as big endian, 64-bit (8 bytes) signed
-        # TODO do this in a non-shitty way
-        push Code.CONST_I_BIG([ ast ].pack('Q>').split('').map(&:ord), ast.to_s)
-      else
-        push Code.CONST_I(ast)
-      end
-    when Atom
-      code = @program.add_string(ast.value)
-      push Code.CONST_A(code, ast.value)
     end
   end
 
-  def generate_call(ast)
+  def process_string(ast, top_level)
+    code = @program.add_string(ast)      
+    push Code.CONST_S(code, ast)
+  end
+
+  def process_integer(ast, top_level)
+    if ast > 255 || ast < 0
+      # Encode as big endian, 64-bit (8 bytes) signed
+      # TODO do this in a non-shitty way
+      push Code.CONST_I_BIG([ ast ].pack('Q>').split('').map(&:ord), ast.to_s)
+    else
+      push Code.CONST_I(ast)
+    end
+  end
+
+  def process_atom(ast, top_level)
+    code = @program.add_string(ast.value)
+    push Code.CONST_A(code, ast.value)
+  end
+
+  def process_array(ast, top_level)
     first = ast.first
     unless first
       push Code.NEW_LIST
@@ -71,11 +82,11 @@ class CodeGenerator
         binds.each_slice(2) do |slice|
           name, expr = slice
           raise "Not an identifier: #{name}" unless name.is_a? Identifier
-          generate(expr)
+          process(expr)
           push Code.STORE(name.code, name.name_and_location)
         end
         ast[2..-1].each do |node|
-          generate(node)
+          process(node)
         end
       when 'alias', 'import'
         return
@@ -90,17 +101,17 @@ class CodeGenerator
         expr = ast[2]
         raise "def name must be identifier" unless name.is_a? Identifier
         raise 'def accepts 2 args' if ast.size > 3
-        generate(expr)
+        process(expr)
         push Code.DEFINE(name.code, name.name_and_location)
       when 'spawn'
         spawn = Code.SPAWN(-1)
         push spawn
         idx = @program.position
-        generate(ast[1])
+        process(ast[1])
         spawn.args[0] = @program.position - idx
       when 'recur'
         ast[1..-1].each do |expr|
-          generate(expr)
+          process(expr)
         end
         # Extra two for the two instructions pushed
         push Code.JUMP_BACK(@program.position - @func_recur_points[-1] + 2)
@@ -117,7 +128,7 @@ class CodeGenerator
 
         body = ast[2..-1]
         body.each do |node|
-          generate(node)
+          process(node)
         end
         @func_recur_points.pop
         push Code.RETURN
@@ -131,17 +142,17 @@ class CodeGenerator
         push Code.CLOSURE(closure_args, debug)
       when 'if'
         _, cond, then_block, else_block = ast
-        generate(cond)
+        process(cond)
         jump = Code.AND(-1) # Don't know where to jump to
         push jump
         start = @program.position
-        generate(then_block)
+        process(then_block)
         if else_block
           else_jump = Code.JUMP(-1)
           push else_jump
           else_start = @program.position
           jump.args[0] = @program.position - start
-          generate(else_block)
+          process(else_block)
           # jump to end of else block
           else_jump.args[0] = @program.position - else_start
         else
@@ -150,13 +161,13 @@ class CodeGenerator
         end
       when 'do'
         ast[1..-1].each do |arg|
-          generate(arg)
+          process(arg)
         end
       else
         ast[1..-1].each do |arg|
-          generate(arg)
+          process(arg)
         end
-        generate(ast[0])
+        process(ast[0])
         # Minus one for function name
         arg_count = ast.size - 1
         push Code.INVOKE(arg_count, ast[0].is_a?(Identifier) ? ast[0].whole : nil)
@@ -164,7 +175,7 @@ class CodeGenerator
     else
       puts "Woops: #{ast.inspect}"
       ast.each do |arg|
-        generate(arg)
+        process(arg)
       end
       push Code.INVOKE(-1, 'apply')
     end
