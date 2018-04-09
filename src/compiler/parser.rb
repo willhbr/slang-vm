@@ -4,6 +4,18 @@ require_relative './program'
 class ExpectedEOF < Exception
 end
 
+class Location
+  def initialize(filename, line, column)
+    @filename = filename
+    @line = line
+    @column = column
+  end
+
+  def to_s
+    "#{@filename}@#{@line}:#{@column}"
+  end
+end
+
 class Scanner
   class Token
     attr_reader :type
@@ -42,7 +54,6 @@ class Scanner
         break
       end
     end
-    tokens << sym(:EOF)
     tokens
   end
 
@@ -127,7 +138,7 @@ class Scanner
 
   def identifier
     start = @index - 1
-    advance! while is_iden_start(peek?)
+    advance! while is_iden_middle(peek?)
     return @contents[start..@index - 1]
   end
 
@@ -137,12 +148,16 @@ class Scanner
     @line += 1
   end
 
+  def is_iden_middle(char)
+    '1234567890'.include?(char) || is_iden_start(char)
+  end
+
   def is_iden_start(char)
-    '1234567890QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm!@#$%^&*-_=+\|:?/,<>.'.include? char
+    'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm!@#$%^&*-_=+\|:?/,<>.'.include? char
   end
 
   def sym(type, value=nil)
-    Token.new(type, value, [@line, @column])
+    Token.new(type, value, Location.new(@filename, @line, @column))
   end
 
   def peek?
@@ -155,7 +170,7 @@ class Scanner
 
   def advance!
     c = @contents[@index]
-    raise "EOF" unless c
+    raise "Unexpected EOF" unless c
     @column += 1
     @index += 1
     c
@@ -170,18 +185,15 @@ class Parser
 
   def program
     prog = []
-    loop do
-      begin
-        prog << object
-      rescue ExpectedEOF
-        break
-      end
+    while o = object
+      prog << o
     end
     prog
   end
 
   def object
     symbol = pop_sym?
+    return nil unless symbol
     case symbol.type
       when :'('
         return list(:')', Array.new)
@@ -213,10 +225,8 @@ class Parser
         atom(symbol)
       when :KW_ARG
         kw_arg(symbol)
-      when :EOF
-        raise ExpectedEOF.new
       else
-        raise "Syntax error, oops! #{symbol.type} #{symbol.value}"
+        raise "Syntax error: Unexpected #{symbol.type} '#{symbol.value}' (#{symbol.location})"
     end
   end
 

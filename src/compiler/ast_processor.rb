@@ -1,3 +1,5 @@
+require_relative './flags'
+
 module ASTProcessor
   def process_top_level(ast)
     reset()
@@ -15,6 +17,9 @@ module ASTProcessor
   private
 
   def process(ast, top_level=false)
+    if Flags[:show_process]
+      puts "#{('[ ' + self.class.to_s + ' ]').ljust(20, ' ')} #{ast.inspect}"
+    end
     name = ast.class.to_s.downcase
     if self.respond_to? :"process_#{name}"
       self.send(:"process_#{name}", ast, top_level)

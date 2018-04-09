@@ -1,5 +1,0 @@
-(module Foo)
-
-(IO.puts "Hello world")
-
-(defn foo [] (IO.puts "hi from foo"))

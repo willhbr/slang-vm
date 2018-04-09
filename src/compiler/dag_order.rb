@@ -52,11 +52,12 @@ class DAGOrder
       end
     end
     result = []
-    dag.dependent_order("Main").reverse.each do |mod|
+    dep_order = dag.dependent_order("Main").reverse
+    dep_order.each do |mod|
       if contents = module_contents[mod]
         result += contents
       end
     end
-    result
+    return result, dep_order
   end
 end
