@@ -8,7 +8,6 @@ class ResolverState
 
   def initialize
     @scopes = [ Hash.new ]
-    @top_level = true
     @in_func = 0
   end
 
@@ -20,11 +19,10 @@ class ResolverState
   end
 end
 
-class Resolver
+class LocalResolver
   include ASTProcessor
   def initialize
     @next_id = 0
-    @current_module = nil
     @on_local_bind = []
     @state = ResolverState.new
   end
@@ -40,10 +38,6 @@ class Resolver
   def process_identifier(ast, top_level)
     return if Identifier::KEYWORDS.include? ast.whole
     return if bind_to_local(ast)
-    raise "No module defined!" unless @current_module
-    return if Defs.get_module?(@current_module, ast)
-    return if Defs.get_module_def?(@current_module, ast)
-    raise "Undefined var: #{ast.whole} #{ast.location}"
   end
 
   def process_fn(ast)
@@ -54,7 +48,7 @@ class Resolver
       raise "Args must be vector, not #{args.class} #{ast[0].location}" unless args.is_a? Vector
       args.each do |arg|
         raise "Arg must be identifier: #{arg}" unless arg.is_a? Identifier
-        set_binding(arg)
+        bind_new!(arg)
       end
       captured = []
       # This is a hackety hack
@@ -84,41 +78,13 @@ class Resolver
             name, expr = slice
             process(expr)
             raise "Not an identifier: #{name}" unless name.is_a? Identifier
-            set_binding(name)
+            bind_new!(name)
           end
           ast[2..-1].each do |node|
             process(node)
           end
         end
-      when 'alias'
-        raise 'cannot alias outside module' unless @current_module
-        mod = ast[1]
-        raise 'Can only alias modules' unless mod.is_a? Identifier
-        process(mod)
-        alias_to = ast[2]
-        raise 'Can only alias modules' unless alias_to.is_a?(Identifier)
-        Defs.alias(@current_module, mod, alias_to)
-      when 'import'
-        raise 'cannot import outside module' unless @current_module
-        mod = ast[1]
-        raise 'Can only alias modules' unless mod.is_a? Identifier
-        process(mod)
-        Defs.import(@current_module, mod)
-      when 'module'
-        raise "Can only define module at top-level" unless top_level
-        _, name = ast
-        Defs.define_module(name)
-        @current_module = name
-      when 'def'
-        raise "Can only def at top-level" unless top_level
-        first, name, value = ast
-        process(value)
-        raise 'Cannot define outside of module' unless @current_module
-        raise "Cannot define in other module: #{name.mod}" unless name.no_module?
-        if Defs.get_module_def?(@current_module, name)
-          raise "Already defined #{name.whole} on #{iden.location}"
-        end
-        Defs.def_def(@current_module, name)
+      # These are skipped to be resolved later
       when 'recur'
         if @state.in_func != 0
           ast[1..-1].each { |node| process(node, top_level) }
@@ -127,8 +93,6 @@ class Resolver
         end
       when 'fn'
         process_fn(ast)
-      when 'do'
-        ast[1..-1].each { |node| process(node, top_level) }
       else
         if Identifier::KEYWORDS.include? first.whole
           ast[1..-1].each { |node| process(node) }
@@ -154,7 +118,7 @@ class Resolver
     return false
   end
 
-  def set_binding(identifier)
+  def bind_new!(identifier)
     identifier.code = @next_id
     @next_id += 1
     @state.scopes[-1][identifier.whole] = identifier

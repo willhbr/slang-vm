@@ -1,4 +1,3 @@
-require_relative './resolve'
 require_relative './objects'
 require_relative './program'
 

@@ -1,4 +1,5 @@
-require_relative './resolve'
+require_relative './local_resolver'
+require_relative './def_resolver'
 require_relative './objects'
 require_relative './program'
 require_relative './parser'
@@ -16,8 +17,14 @@ tree = tree.map do |node|
   bad_macro_expander.process_top_level(node)
 end
 
-res = Resolver.new
+res = LocalResolver.new
+tree.each do |node|
+  res.process_top_level(node)
+end
 
+p tree
+
+res = DefResolver.new
 tree.each do |node|
   res.process_top_level(node)
 end
