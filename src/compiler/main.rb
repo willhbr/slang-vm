@@ -40,8 +40,6 @@ ordered.map do |node|
   code_gen.process_top_level(node)
 end
 
-code_gen.program.print
-
 File.open(ARGV[0], 'wb') do |output|
   code_gen.program.write_to(output)
 end
