@@ -17,6 +17,15 @@ class Builtins
       :new,
       :send,
       :receive
+    ],
+    Enumerable: [
+      :reduce
+    ]
+  }
+
+  PROTOCOL_METHODS = {
+    Enumerable: [
+      :reduce
     ]
   }
 end
@@ -88,7 +97,7 @@ class Defs
 
   def self.def_def(current, identifier)
     identifier.make_global!
-    existing = get_module_def?(current, identifier)
+    existing, _ = get_module_def?(current, identifier)
     if existing
       identifier.code = existing.code
       return
@@ -140,9 +149,9 @@ class Defs
 end
 
 Builtins::MODULES.sort.each do |name, methods|
-  current = Defs.define_module(Identifier.new(name.to_s, [nil, nil]))
+  current = Defs.define_module(Identifier.new(name.to_s, nil))
   methods.sort.each do |method|
-    Defs.def_def(current, Identifier.new(method.to_s, [nil, nil]))
+    Defs.def_def(current, Identifier.new(method.to_s, nil))
   end
 end
 
@@ -170,6 +179,14 @@ if __FILE__==$0
       file.puts "ds.Module{Name: \"#{module_identifier.whole}\"},"
       defs.each do |name, iden|
         next if name.is_a?(Symbol)
+        if (proto = Builtins::PROTOCOL_METHODS[mod.to_sym]) && (proto.include? name.to_sym)
+          if iden.location.nil? # It's an internal method, not overriden
+            file.puts "// #{iden.whole}: #{iden.code} (proto method)"
+            file.puts "ProtocolClosure{ID: #{iden.code}},"
+            next
+          end
+        end
+
         file.puts "// #{iden.whole}: #{iden.code}"
         file.puts "GoClosure{Function: #{iden.module_part}__#{to_go_name(iden.var_part)}},"
       end

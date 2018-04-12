@@ -9,22 +9,26 @@ GoClosure{Function: Channel__new},
 GoClosure{Function: Channel__receive},
 // Channel.send: 3
 GoClosure{Function: Channel__send},
-// IO: 4
+// Enumerable: 4
+ds.Module{Name: "Enumerable"},
+// Enumerable.reduce: 5 (proto method)
+ProtocolClosure{ID: 5},
+// IO: 6
 ds.Module{Name: "IO"},
-// IO.gets: 5
+// IO.gets: 7
 GoClosure{Function: IO__gets},
-// IO.puts: 6
+// IO.puts: 8
 GoClosure{Function: IO__puts},
-// Kernel: 7
+// Kernel: 9
 ds.Module{Name: "Kernel"},
-// Kernel.*: 8
+// Kernel.*: 10
 GoClosure{Function: Kernel__times},
-// Kernel.-: 9
+// Kernel.-: 11
 GoClosure{Function: Kernel__minus},
-// Kernel.<: 10
+// Kernel.<: 12
 GoClosure{Function: Kernel__lessThan},
-// Kernel.conj: 11
+// Kernel.conj: 13
 GoClosure{Function: Kernel__conj},
-// Kernel.type: 12
+// Kernel.type: 14
 GoClosure{Function: Kernel__type},
 }
