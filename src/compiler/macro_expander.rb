@@ -58,7 +58,8 @@ class MacroExpander
     return unless first
     if first.is_a? Identifier
       if macro = @macros[first.whole]
-        return macro.(ast)
+        # TODO make 'deftype' something different after macro
+        return process(macro.(ast)
       end
     end
     ast.map { |node| process(node) }

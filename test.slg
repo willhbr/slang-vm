@@ -1,11 +1,38 @@
-(module Enumerable)
-(defprotocol reduce)
+(module Main)
+(import Sequence)
+
+(deftype Foo :a :b)
+
+(defn Foo.bar [foo] (IO.puts foo) foo)
+
+(let [f (Foo.new 1 2)]
+  (IO.puts (Foo.bar f))
+  (IO.puts (Kernel.type f)))
+
+
+(let [v [1 2 3]]
+  (IO.puts (head v 4)))
+
 
 (module Main)
 
-(Enumerable.reduce [1 2 3] 0 (fn [a b] [a b]))
+; (defn new [a b] (CREATE Main a b))
 
-(deftype Thing :foo :bar)
+(Foo.new 1 2)
 
-(let [inst (Thing.new 1 2)]
-  (IO.puts inst))
+(defn reduce [vector init func]
+  (let [current (head vector)
+        result (func current init)]
+    (recur (tail vector) result func)))
+
+(defn reverse [sequence]
+  (-> sequence
+    (Enumerable.reduce (fn [acc item]
+      (cons acc item)))))
+
+(defn map [sequence func]
+  (-> sequence
+    (Enumerable.reduce (list)
+      (fn [acc item]
+        (cons acc (func item))))
+    reverse))

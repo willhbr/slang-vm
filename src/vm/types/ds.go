@@ -1,4 +1,4 @@
-package ds
+package types
 
 import "math/big"
 
@@ -20,9 +20,9 @@ type Type struct {
 	Attributes      []uint8
 }
 
-func (t Type) String() string {
-	return t.Name
-}
+// func (t Type) String() string {
+// 	return t.Name
+// }
 
 // TODO This just does a linear search, maybe work something better out?
 func (t Type) GetAttrFrom(inst Instance, atomValue uint8) Value {
@@ -57,46 +57,9 @@ func (m Module) String() string {
 	return m.Name
 }
 
-var intType = Type{Name: "Int"}
-var stringType = Type{Name: "String"}
-var boolType = Type{Name: "Bool"}
-var moduleType = Type{Name: "Module"}
-var atomType = Type{Name: "Atom"}
-var vectorType = Type{Name: "Vector"}
-var listType = Type{Name: "List"}
-var mapType = Type{Name: "Map"}
-
-var NilType = Type{Name: "Nil"}
-var Nil = Instance{Type: &NilType}
-
 type Value interface{}
 
-func GetType(thing interface{}) *Type {
-	switch thing.(type) {
-	case *big.Int:
-		return &intType
-	case string:
-		return &stringType
-	case bool:
-		return &boolType
-	case *Instance:
-		return thing.(Instance).Type
-	case *Module:
-		return &moduleType
-	case Atom:
-		return &atomType
-	case *Vector:
-		return &vectorType
-	case *List:
-		return &listType
-	case *Map:
-		return &mapType
-	default:
-		panic("Cannot get type of variable")
-	}
-}
-
-//go:generate peds -pkg=ds -maps="Map<Value,Value>" -sets="Set<Value>" -vectors="Vector<Value>" -file=generated_collections.go
+//go:generate peds -pkg=types -maps="Map<Value,Value>" -sets="Set<Value>" -vectors="Vector<Value>" -file=generated_collections.go
 
 type List struct {
 	value *Value

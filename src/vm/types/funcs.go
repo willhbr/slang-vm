@@ -1,25 +1,20 @@
-package funcs
-
-import (
-	"../ds"
-	"../vm"
-)
+package types
 
 type SlangClosure struct {
 	ProgramPosition uint
 	// TODO Replace this with a more efficient mapping
-	Registers []ds.Value
+	Registers []Value
 }
 
 func NewSlangClosure(position uint) SlangClosure {
 	return SlangClosure{
 		ProgramPosition: position,
-		Registers:       make([]ds.Value, 100, 100),
+		Registers:       make([]Value, 100, 100),
 	}
 }
 
 type GoClosure struct {
-	Function func(*vm.Coroutine, ...ds.Value) ds.Value
+	Function func(...Value) Value
 }
 
 type ProtocolClosure struct {
@@ -32,4 +27,4 @@ func (g ProtocolClosure) IsBuiltin() bool { return false }
 
 // This is where the stdlib lives
 // The stdlib should always be in the start of the array, so it can be expanded
-//go:generate ruby ../../compiler/generate_funcs.rb ./generated_funcs.go
+//go:generate ruby ../../compiler/generate_funcs.rb ./generated_funcs.go ./generated_types.go

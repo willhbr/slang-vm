@@ -1,5 +1,3 @@
-require_relative './builtins'
-
 class Defs
   @@defs = Hash.new
 
@@ -117,12 +115,3 @@ class Defs
     iden.code
   end
 end
-
-Builtins::MODULES.sort.each do |name, methods|
-  current = Defs.define_module(Identifier.new(name.to_s, nil))
-  methods.sort.each do |method|
-    Defs.def_def(current, Identifier.new(method.to_s, nil))
-  end
-end
-
-

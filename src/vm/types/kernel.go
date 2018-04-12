@@ -1,36 +1,34 @@
-package funcs
+package types
 
 import (
-	"../ds"
-	"../vm"
 	"math/big"
 )
 
-func Kernel__type(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
+func Kernel__type(arguments ...Value) Value {
 	if len(arguments) != 1 {
 		panic("Too many arguments to Kernel.type")
 	}
-	return ds.GetType(arguments[0])
+	return GetType(arguments[0])
 }
 
-func Kernel__minus(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
+func Kernel__minus(arguments ...Value) Value {
 	result := big.Int{}
 	result.Sub(arguments[0].(*big.Int), arguments[1].(*big.Int))
 	return &result
 }
 
-func Kernel__lessThan(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
+func Kernel__lessThan(arguments ...Value) Value {
 	return arguments[0].(*big.Int).Cmp(arguments[1].(*big.Int)) == -1
 }
 
-func Kernel__times(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
+func Kernel__times(arguments ...Value) Value {
 	result := big.Int{}
 	result.Mul(arguments[0].(*big.Int), arguments[1].(*big.Int))
 	return &result
 }
 
-func Kernel__conj(co *vm.Coroutine, arguments ...ds.Value) ds.Value {
-	vec := arguments[0].(*ds.Vector)
+func Kernel__conj(arguments ...Value) Value {
+	vec := arguments[0].(*Vector)
 	for i := 1; i < len(arguments); i++ {
 		vec = vec.Append(arguments[i])
 	}

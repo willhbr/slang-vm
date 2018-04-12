@@ -1,9 +1,8 @@
 package main
 
 import (
-	"./ds"
-	"./funcs"
 	op "./op_codes"
+	"./types"
 	"./vm"
 	"fmt"
 	"io/ioutil"
@@ -25,7 +24,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 			co.Stack.Push(currentFrame.Registers[program[index]])
 			index++
 		case op.LOAD_DEF:
-			co.Stack.Push(funcs.Defs[program[index]])
+			co.Stack.Push(types.Defs[program[index]])
 			index++
 		case op.STORE:
 			value := co.Stack.Pop()
@@ -39,17 +38,17 @@ func Run(co *vm.Coroutine, startIndex int) {
 		Finished:
 			for {
 				switch fun.(type) {
-				case funcs.GoClosure:
-					arguments := make([]ds.Value, argCount, argCount)
+				case types.GoClosure:
+					arguments := make([]types.Value, argCount, argCount)
 					size := len(arguments)
 					for i := size - 1; i >= 0; i-- {
 						arguments[i] = co.Stack.Pop()
 					}
-					result := fun.(funcs.GoClosure).Function(co, arguments...)
+					result := fun.(types.GoClosure).Function(arguments...)
 					co.Stack.Push(result)
 					break Finished
-				case funcs.SlangClosure:
-					closure := fun.(funcs.SlangClosure)
+				case types.SlangClosure:
+					closure := fun.(types.SlangClosure)
 					currentFrame.ContinueIndex = index
 					index = int(closure.ProgramPosition)
 					currentFrame = vm.NewFrameFrom(currentFrame)
@@ -57,13 +56,13 @@ func Run(co *vm.Coroutine, startIndex int) {
 						currentFrame.Registers[i] = value
 					}
 					break Finished
-				case funcs.ProtocolClosure:
-					closure := fun.(funcs.ProtocolClosure)
+				case types.ProtocolClosure:
+					closure := fun.(types.ProtocolClosure)
 					subject, ok := co.Stack.PeekFromTopMinus(argCount)
 					if !ok {
 						panic("Cannot call protocol method with no arguments!")
 					}
-					t := ds.GetType(subject)
+					t := types.GetType(subject)
 					function, ok := t.ProtocolMethods[closure.ID]
 					if !ok {
 						panic(fmt.Errorf("%s does not implement protocol method", t.Name))
@@ -86,11 +85,11 @@ func Run(co *vm.Coroutine, startIndex int) {
 		case op.CONST_A:
 			value := program[index]
 			index++
-			co.Stack.Push(ds.Atom(value))
+			co.Stack.Push(types.Atom(value))
 		case op.CONST_I:
 			value := program[index]
 			index++
-			co.Stack.Push(ds.NewInt(value))
+			co.Stack.Push(types.NewInt(value))
 		case op.CONST_I_BIG:
 			var value int64
 			var read int64
@@ -101,18 +100,18 @@ func Run(co *vm.Coroutine, startIndex int) {
 				value = value | read
 				value = value << 8
 			}
-			co.Stack.Push(ds.NewInt64(value))
+			co.Stack.Push(types.NewInt64(value))
 		case op.CONST_S:
 			idx := program[index]
 			index++
 			str := strings[idx]
-			co.Stack.Push(ds.Value(str))
+			co.Stack.Push(types.Value(str))
 		case op.CONST_TRUE:
-			co.Stack.Push(ds.Value(true))
+			co.Stack.Push(types.Value(true))
 		case op.CONST_FALSE:
-			co.Stack.Push(ds.Value(false))
+			co.Stack.Push(types.Value(false))
 		case op.CONST_NIL:
-			co.Stack.Push(ds.Nil)
+			co.Stack.Push(types.Nil)
 		case op.JUMP:
 			increase := int(program[index])
 			index++
@@ -134,31 +133,31 @@ func Run(co *vm.Coroutine, startIndex int) {
 		case op.NEW_MAP:
 			count := int(program[index])
 			index++
-			arguments := make([]ds.MapItem, count, count)
+			arguments := make([]types.MapItem, count, count)
 			for i := count - 1; i >= 0; i-- {
-				item := ds.MapItem{}
+				item := types.MapItem{}
 				item.Value = co.Stack.Pop()
 				item.Key = co.Stack.Pop()
 				arguments[i] = item
 			}
-			m := ds.NewMap(arguments...)
+			m := types.NewMap(arguments...)
 			co.Stack.Push(m)
 		case op.NEW_VECTOR:
 			count := int(program[index])
 			index++
-			arguments := make([]ds.Value, count, count)
+			arguments := make([]types.Value, count, count)
 			for i := count - 1; i >= 0; i-- {
 				arguments[i] = co.Stack.Pop()
 			}
-			v := ds.NewVector(arguments...)
+			v := types.NewVector(arguments...)
 			co.Stack.Push(v)
 		case op.NEW_LIST:
-			l := ds.NewList()
+			l := types.NewList()
 			co.Stack.Push(l)
 		case op.DEFINE:
 			id := program[index]
 			index++
-			funcs.Defs[int(id)] = co.Stack.Pop()
+			types.Defs[int(id)] = co.Stack.Pop()
 		case op.TYPE:
 			id := program[index]
 			index++
@@ -171,25 +170,25 @@ func Run(co *vm.Coroutine, startIndex int) {
 				attributes[i] = program[index]
 				index++
 			}
-			newType := ds.NewType(co.Program.Strings[nameIndex], attributes)
-			funcs.Defs[int(id)] = newType
+			newType := types.NewType(co.Program.Strings[nameIndex], attributes)
+			types.Defs[int(id)] = newType
 		case op.INSTANCE:
 			typeID := int(program[index])
 			index++
 			size := int(program[index])
 			index++
-			instType := funcs.Defs[typeID].(*ds.Type)
-			attributes := make([]ds.Value, size, size)
+			instType := types.Defs[typeID].(*types.Type)
+			attributes := make([]types.Value, size, size)
 			for i := size - 1; i >= 0; i-- {
 				attributes[i] = co.Stack.Pop()
 			}
-			co.Stack.Push(ds.NewInstance(instType, attributes))
+			co.Stack.Push(types.NewInstance(instType, attributes))
 		case op.CLOSURE:
 			start := uint(program[index])
 			index++
 			capturedCount := int(program[index])
 			index++
-			closure := funcs.NewSlangClosure(start)
+			closure := types.NewSlangClosure(start)
 			endAt := index + capturedCount
 			for ; index < endAt; index++ {
 				register := int(program[index])
@@ -199,8 +198,8 @@ func Run(co *vm.Coroutine, startIndex int) {
 		case op.PROTOCOL_CLOSURE:
 			id := int(program[index])
 			index++
-			closure := funcs.ProtocolClosure{ID: id}
-			funcs.Defs[id] = closure
+			closure := types.ProtocolClosure{ID: id}
+			types.Defs[id] = closure
 		default:
 			panic(fmt.Errorf("Unknown instruction at %d: %d", index, program[index]))
 		}
@@ -227,11 +226,11 @@ func ParseStrings(instructions []byte, position *int) []string {
 func ExpandDefsSlice(instructions []byte, position *int) {
 	size := instructions[*position]
 	*position++
-	defs := make([]ds.Value, int(size), int(size))
-	for i := range funcs.Defs {
-		defs[i] = funcs.Defs[i]
+	defs := make([]types.Value, int(size), int(size))
+	for i := range types.Defs {
+		defs[i] = types.Defs[i]
 	}
-	funcs.Defs = defs
+	types.Defs = defs
 }
 
 func main() {

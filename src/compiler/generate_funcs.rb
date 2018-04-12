@@ -1,4 +1,32 @@
-require_relative './defs'
+require_relative './builtins'
+
+class Def
+  def generate_def(file)
+    file.puts "// #{self.to_s}: #{@code}"
+    case @type
+    when :type
+      file.puts "#{@name}Type,"
+    when :module
+      file.puts "Module{Name: \"#{@name}\"},"
+    when :func, :impl
+      file.puts "GoClosure{Function: #{@module}__#{to_go_name(@name.to_s)}},"
+    when :protocol
+      file.puts "ProtocolClosure{ID: #{@code}},"
+    else
+      nil
+    end
+  end
+
+  def generate_type_with_impls(file)
+    file.puts "// #{self.to_s}: #{@code}"
+    file.puts "var #{@name}Type = &Type{Name: \"#{@name}\","
+    file.puts "ProtocolMethods: map[int]Closure{"
+    @children.select { |c| c.type == :impl }.each do |d|
+      file.puts "#{d.implements.code}: GoClosure{Function: #{@name}__#{to_go_name(d.name.to_s)}},"
+    end
+    file.puts '}}'
+  end
+end
 
 def to_go_name(str)
   {
@@ -14,28 +42,18 @@ end
 
 if __FILE__==$0
   File.open(ARGV[0], 'w') do |file|
-    file.puts "package funcs"
-    file.puts 'import "../ds"'
-    file.puts 'var Defs = []ds.Value {'
-
-    Defs.defs.each do |mod, defs|
-      module_identifier = defs[:__MODULE__]
-      file.puts "// #{mod}: #{module_identifier.code}"
-      file.puts "ds.Module{Name: \"#{module_identifier.whole}\"},"
-      defs.each do |name, iden|
-        next if name.is_a?(Symbol)
-        if (proto = Builtins::PROTOCOL_METHODS[mod.to_sym]) && (proto.include? name.to_sym)
-          if iden.location.nil? # It's an internal method, not overriden
-            file.puts "// #{iden.whole}: #{iden.code} (proto method)"
-            file.puts "ProtocolClosure{ID: #{iden.code}},"
-            next
-          end
-        end
-
-        file.puts "// #{iden.whole}: #{iden.code}"
-        file.puts "GoClosure{Function: #{iden.module_part}__#{to_go_name(iden.var_part)}},"
-      end
+    file.puts "package types"
+    file.puts 'var Defs = []Value {'
+    Def::BUILTIN_DEFS.sort_by { |d| d.code }.each do |d|
+      d.generate_def(file)
     end
     file.puts '}'
+  end
+
+  File.open(ARGV[1], 'w') do |file|
+    file.puts "package types"
+    Def::BUILTIN_DEFS.select { |d| d.type == :type }.each do |d|
+      d.generate_type_with_impls(file)
+    end
   end
 end

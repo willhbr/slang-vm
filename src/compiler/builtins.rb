@@ -1,32 +1,39 @@
-require_relative './objects'
+require_relative './builtins_dsl'
 
-class Builtins
-  MODULES = {
-    IO: [
-      :puts,
-      :gets
-    ],
-    Kernel: [
-      :type,
-      :<,
-      :-,
-      :*,
-      :conj
-    ],
-    Channel: [
-      :new,
-      :send,
-      :receive
-    ],
-    Enumerable: [
-      :reduce
-    ]
-  }
-
-  PROTOCOL_METHODS = {
-    Enumerable: [
-      :reduce
-    ]
-  }
+defmodule :IO do
+  defn :puts
+  defn :gets
 end
 
+defmodule :Kernel do
+  defn :type
+  defn :<
+  defn :-
+  defn :*
+  defn :conj
+end
+
+deftype :Channel do
+  defn :new
+  defn :send
+  defn :receive
+  # defimpl :conj
+end
+
+defmodule :Sequence do
+  defprotocol :conj
+  defprotocol :head
+  defprotocol :tail
+end
+
+defmodule :Enumerable do
+  defprotocol :reduce
+end
+
+deftype :Vector do
+  defimpl :conj, of: [:Sequence, :conj]
+  defimpl :head, of: [:Sequence, :head]
+  defimpl :tail, of: [:Sequence, :tail]
+end
+
+Def.assign_codes
