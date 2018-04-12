@@ -32,4 +32,4 @@ func (g ProtocolClosure) IsBuiltin() bool { return false }
 
 // This is where the stdlib lives
 // The stdlib should always be in the start of the array, so it can be expanded
-//go:generate ruby ../../compiler/builtins.rb ./generated_funcs.go
+//go:generate ruby ../../compiler/generate_funcs.rb ./generated_funcs.go

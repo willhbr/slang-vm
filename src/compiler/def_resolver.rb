@@ -1,5 +1,5 @@
 require_relative './objects'
-require_relative './builtins'
+require_relative './defs'
 require_relative './ast_processor'
 
 class DefResolver
