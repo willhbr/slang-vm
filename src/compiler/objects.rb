@@ -35,8 +35,9 @@ class Identifier
     'true',
     'false',
     'nil',
-    'def-type',
-    'new-instance'
+    'deftype',
+    'new-instance',
+    'defprotocol'
   ]
 
   def self.from(other, new_value)

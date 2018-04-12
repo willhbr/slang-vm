@@ -163,6 +163,10 @@ class CodeGenerator
           # jump to end of if
           jump.args[0] = @program.position - start
         end
+      when 'defprotocol'
+        # TODO should this work as Module.method or just method?
+        name = ast[1]
+        push Code.PROTOCOL_CLOSURE(name.code, name.whole)
       when 'deftype'
         name = ast[1]
         attrs = ast[2..-1]

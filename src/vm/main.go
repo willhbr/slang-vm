@@ -59,7 +59,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 					break Finished
 				case funcs.ProtocolClosure:
 					closure := fun.(funcs.ProtocolClosure)
-					subject, ok := co.Stack.PeekFromTopMinus(argCount - 1)
+					subject, ok := co.Stack.PeekFromTopMinus(argCount)
 					if !ok {
 						panic("Cannot call protocol method with no arguments!")
 					}
@@ -196,6 +196,11 @@ func Run(co *vm.Coroutine, startIndex int) {
 				closure.Registers[register] = currentFrame.Registers[register]
 			}
 			co.Stack.Push(closure)
+		case op.PROTOCOL_CLOSURE:
+			id := int(program[index])
+			index++
+			closure := funcs.ProtocolClosure{ID: id}
+			funcs.Defs[id] = closure
 		default:
 			panic(fmt.Errorf("Unknown instruction at %d: %d", index, program[index]))
 		}

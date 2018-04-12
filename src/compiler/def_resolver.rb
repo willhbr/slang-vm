@@ -96,6 +96,10 @@ class DefResolver
         raise "attributes must be atoms, got: #{attributes.map(&:class)}" unless attributes.all? { |a| a.is_a? Atom }        
         Defs.define_module(name) unless name == @current_module
         use! name
+      when 'defprotocol'
+        name = ast[1]
+        raise "Protocol method name must be identifier" unless name.is_a? Identifier
+        Defs.def_def @current_module, name
       when 'do'
         ast[1..-1].each do |node|
           process(node, top_level)

@@ -1,4 +1,9 @@
+(module Enumerable)
+(defprotocol reduce)
+
 (module Main)
+
+(Enumerable.reduce [1 2 3] 0 (fn [a b] [a b]))
 
 (deftype Thing :foo :bar)
 
