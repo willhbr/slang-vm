@@ -33,6 +33,16 @@ class MacroExpander
     "unless": lambda do |ast|
       unless_, cond, then_, other = ast
       [Identifier.from(unless_, 'if'), cond, other || Identifier.new('nil', nil), then_]
+    end,
+    "deftype": lambda do |ast|
+      deftype, name = ast
+      attrs = ast[2..-1]
+      args = (0...attrs.size).map { |a| kw(:"arg_#{a}") }
+      [kw(:do),
+        ast,
+        [kw(:def), from(name, :"#{name.whole}.new"),
+          [kw(:fn), vec(*args),
+            [kw(:"new-instance"), name] + args]]]
     end
   }
 
@@ -56,5 +66,17 @@ class MacroExpander
 
   def process_other(ast, top_level)
     passthrough_nested(ast)
+  end
+
+  def self.kw(name)
+    Identifier.new name.to_s, nil
+  end
+
+  def self.vec(*items)
+    Vector.new items
+  end
+
+  def self.from(iden, name)
+    Identifier.from(iden, name.to_s)
   end
 end

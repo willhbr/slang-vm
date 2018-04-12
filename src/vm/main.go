@@ -34,27 +34,44 @@ func Run(co *vm.Coroutine, startIndex int) {
 			index++
 		case op.INVOKE:
 			fun := co.Stack.Pop()
-			arg_count := int(program[index])
+			argCount := int(program[index])
 			index++
-			switch fun.(type) {
-			case funcs.GoClosure:
-				arguments := make([]ds.Value, arg_count, arg_count)
-				size := len(arguments)
-				for i := size - 1; i >= 0; i-- {
-					arguments[i] = co.Stack.Pop()
+		Finished:
+			for {
+				switch fun.(type) {
+				case funcs.GoClosure:
+					arguments := make([]ds.Value, argCount, argCount)
+					size := len(arguments)
+					for i := size - 1; i >= 0; i-- {
+						arguments[i] = co.Stack.Pop()
+					}
+					result := fun.(funcs.GoClosure).Function(co, arguments...)
+					co.Stack.Push(result)
+					break Finished
+				case funcs.SlangClosure:
+					closure := fun.(funcs.SlangClosure)
+					currentFrame.ContinueIndex = index
+					index = int(closure.ProgramPosition)
+					currentFrame = vm.NewFrameFrom(currentFrame)
+					for i, value := range closure.Registers {
+						currentFrame.Registers[i] = value
+					}
+					break Finished
+				case funcs.ProtocolClosure:
+					closure := fun.(funcs.ProtocolClosure)
+					subject, ok := co.Stack.PeekFromTopMinus(argCount - 1)
+					if !ok {
+						panic("Cannot call protocol method with no arguments!")
+					}
+					t := ds.GetType(subject)
+					function, ok := t.ProtocolMethods[closure.ID]
+					if !ok {
+						panic(fmt.Errorf("%s does not implement protocol method", t.Name))
+					}
+					fun = function
+				default:
+					panic("Can't call a non-function")
 				}
-				result := fun.(funcs.GoClosure).Function(co, arguments...)
-				co.Stack.Push(result)
-			case funcs.SlangClosure:
-				closure := fun.(funcs.SlangClosure)
-				currentFrame.ContinueIndex = index
-				index = int(closure.ProgramPosition)
-				currentFrame = vm.NewFrameFrom(currentFrame)
-				for i, value := range closure.Registers {
-					currentFrame.Registers[i] = value
-				}
-			default:
-				panic("Can't call a non-function")
 			}
 		case op.SPAWN:
 			skip := program[index]
@@ -142,6 +159,31 @@ func Run(co *vm.Coroutine, startIndex int) {
 			id := program[index]
 			index++
 			funcs.Defs[int(id)] = co.Stack.Pop()
+		case op.TYPE:
+			id := program[index]
+			index++
+			nameIndex := int(program[index])
+			index++
+			attrCount := int(program[index])
+			index++
+			attributes := make([]uint8, attrCount, attrCount)
+			for i := range attributes {
+				attributes[i] = program[index]
+				index++
+			}
+			newType := ds.NewType(co.Program.Strings[nameIndex], attributes)
+			funcs.Defs[int(id)] = newType
+		case op.INSTANCE:
+			typeID := int(program[index])
+			index++
+			size := int(program[index])
+			index++
+			instType := funcs.Defs[typeID].(*ds.Type)
+			attributes := make([]ds.Value, size, size)
+			for i := size - 1; i >= 0; i-- {
+				attributes[i] = co.Stack.Pop()
+			}
+			co.Stack.Push(ds.NewInstance(instType, attributes))
 		case op.CLOSURE:
 			start := uint(program[index])
 			index++
@@ -189,7 +231,6 @@ func ExpandDefsSlice(instructions []byte, position *int) {
 
 func main() {
 	instructions, err := ioutil.ReadFile(os.Args[1])
-	fmt.Println(instructions)
 	if err != nil {
 		panic(err)
 	}
@@ -197,7 +238,6 @@ func main() {
 	startIndex := 0
 	strings := ParseStrings(instructions, &startIndex)
 	ExpandDefsSlice(instructions, &startIndex)
-	fmt.Println(funcs.Defs)
 	prog := vm.Program{Instructions: instructions[startIndex:], Strings: strings}
 	coroutine.Program = &prog
 	Run(coroutine, 0)

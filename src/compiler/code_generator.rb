@@ -55,6 +55,16 @@ class CodeGenerator
     push Code.CONST_S(code, ast)
   end
 
+  def process_atom(ast, top_level)
+    # TODO Use other set of IDs for atoms
+    code = new_atom(ast)
+    push Code.CONST_A(code, ast)
+  end
+
+  def new_atom(ast)
+    @program.add_string(ast.value)
+  end
+
   def process_integer(ast, top_level)
     if ast > 255 || ast < 0
       # Encode as big endian, 64-bit (8 bytes) signed
@@ -103,12 +113,6 @@ class CodeGenerator
         raise 'def accepts 2 args' if ast.size > 3
         process(expr)
         push Code.DEFINE(name.code, name.name_and_location)
-      when 'spawn'
-        spawn = Code.SPAWN(-1)
-        push spawn
-        idx = @program.position
-        process(ast[1])
-        spawn.args[0] = @program.position - idx
       when 'recur'
         ast[1..-1].each do |expr|
           process(expr)
@@ -159,6 +163,26 @@ class CodeGenerator
           # jump to end of if
           jump.args[0] = @program.position - start
         end
+      when 'deftype'
+        name = ast[1]
+        attrs = ast[2..-1]
+        str = @program.add_string(name.whole)
+        codes = [name.code, str]
+        debug = [name.whole, '-', 'size']
+        codes.push attrs.size
+        attrs.each do |attr|
+          code = new_atom(attr)
+          debug.push attr.value
+          codes.push code
+        end
+        push Code.TYPE(codes, debug)
+      when 'new-instance'
+        name = ast[1]
+        attrs = ast[2..-1]
+        attrs.each do |attr|
+          process(attr)
+        end
+        push Code.INSTANCE([name.code, attrs.size], [name.whole, 'size'])
       when 'do'
         ast[1..-1].each do |arg|
           process(arg)

@@ -91,11 +91,14 @@ class Code
   AND = 15
   RETURN = 16
   CLOSURE = 17
+  PROTOCOL_CLOSURE = 23
   NEW_MAP = 18
   NEW_VECTOR = 19
   NEW_LIST = 20
   DEFINE = 21
   SPAWN = 22
+  TYPE = 24
+  INSTANCE = 25
 
   CODE_VALUES = Hash.new
   CODE_NAMES = Hash.new

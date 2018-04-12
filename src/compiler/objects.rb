@@ -29,12 +29,14 @@ class Identifier
   KEYWORDS = [
     'let',
     'if',
+    'do',
     'def',
     'fn',
     'true',
     'false',
     'nil',
-    'spawn'
+    'def-type',
+    'new-instance'
   ]
 
   def self.from(other, new_value)

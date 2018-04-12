@@ -74,11 +74,32 @@ class DefResolver
         check_unbound! name
         process(value)
         raise 'Cannot define outside of module' unless @current_module
-        raise "Cannot define in other module: #{name.mod}" unless name.no_module?
-        if Defs.get_module_def?(@current_module, name)
-          raise "Already defined #{name.whole} on #{iden.location}"
+        if name.no_module?
+          mod = @current_module
+        else
+          mod_iden = Identifier.from(name, name.module_part)
+          mod = Defs.get_module? @current_module, mod_iden
+          unless mod
+            mod = Defs.define_module mod_iden
+          end
         end
-        Defs.def_def(@current_module, name)
+        if Defs.get_module_def?(mod, name)
+          p mod, name
+          raise "Already defined #{name.whole} on #{name.location}"
+        end
+        Defs.def_def(mod, name)
+      when 'deftype'
+        raise "Can only def at top-level" unless top_level
+        name = ast[1]
+        raise "Name must be identifier" unless name.is_a? Identifier
+        attributes = ast[2..-1]
+        raise "attributes must be atoms, got: #{attributes.map(&:class)}" unless attributes.all? { |a| a.is_a? Atom }        
+        Defs.define_module(name) unless name == @current_module
+        use! name
+      when 'do'
+        ast[1..-1].each do |node|
+          process(node, top_level)
+        end
       else
         if Identifier::KEYWORDS.include? first.whole
           ast[1..-1].each { |node| process(node) }

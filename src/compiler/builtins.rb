@@ -113,7 +113,7 @@ class Defs
   def self.define_module(identifier)
     identifier.make_global!
     mod = identifier.whole
-    defs = @@defs[mod] ||= blank_def(identifier)
+    @@defs[mod] ||= blank_def(identifier)
     if identifier.code.nil?
       identifier.code = @@next_code
       @@next_code += 1

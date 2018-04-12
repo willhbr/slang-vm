@@ -1,3 +1,6 @@
 (module Main)
 
-(IO.puts "Hello world")
+(deftype Thing :foo :bar)
+
+(let [inst (Thing.new 1 2)]
+  (IO.puts inst))

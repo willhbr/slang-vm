@@ -16,11 +16,14 @@ JUMP_BACK = 14
 AND = 15
 RETURN = 16
 CLOSURE = 17
+PROTOCOL_CLOSURE = 23
 NEW_MAP = 18
 NEW_VECTOR = 19
 NEW_LIST = 20
 DEFINE = 21
 SPAWN = 22
+TYPE = 24
+INSTANCE = 25
 )
 func ToString(code byte) string {
 switch code {
@@ -41,10 +44,13 @@ case JUMP_BACK: return "JUMP_BACK"
 case AND: return "AND"
 case RETURN: return "RETURN"
 case CLOSURE: return "CLOSURE"
+case PROTOCOL_CLOSURE: return "PROTOCOL_CLOSURE"
 case NEW_MAP: return "NEW_MAP"
 case NEW_VECTOR: return "NEW_VECTOR"
 case NEW_LIST: return "NEW_LIST"
 case DEFINE: return "DEFINE"
 case SPAWN: return "SPAWN"
+case TYPE: return "TYPE"
+case INSTANCE: return "INSTANCE"
 default: return "UNKNOWN"
 }}

@@ -42,6 +42,15 @@ func (s Stack) Peek() ds.Value {
 	return (*s.values)[len(*s.values)-1]
 }
 
+// Get something a certain offset down, or false if out of range
+func (s Stack) PeekFromTopMinus(distance int) (ds.Value, bool) {
+	idx := len(*s.values) - distance
+	if idx < 0 {
+		return nil, false
+	}
+	return (*s.values)[idx], true
+}
+
 func MakeStack() Stack {
 	vals := make([]ds.Value, 0, 100)
 	return Stack{values: &vals}
