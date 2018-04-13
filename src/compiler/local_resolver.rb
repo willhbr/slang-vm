@@ -89,7 +89,7 @@ class LocalResolver
         if @state.in_func != 0
           ast[1..-1].each { |node| process(node, top_level) }
         else
-          raise "Can't recur outside function"
+          raise "Can't recur outside function #{first.location}"
         end
       when 'fn'
         process_fn(ast)

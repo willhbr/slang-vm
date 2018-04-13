@@ -68,8 +68,8 @@ type List struct {
 
 var emptyList = List{}
 
-func NewList() List {
-	return List{}
+func NewList() *List {
+	return &List{}
 }
 
 func (l List) IsEmpty() bool {
@@ -84,7 +84,7 @@ func (l List) Tail() List {
 	}
 }
 
-func (l List) Value() Value {
+func (l List) Head() Value {
 	if l.IsEmpty() {
 		return Nil
 	} else {
@@ -92,6 +92,6 @@ func (l List) Value() Value {
 	}
 }
 
-func (l List) Cons(value Value) List {
-	return List{value: &value, next: &l}
+func (l List) Cons(value Value) *List {
+	return &List{value: &value, next: &l}
 }

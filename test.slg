@@ -1,25 +1,6 @@
 (module Main)
 (import Sequence)
 
-(deftype Foo :a :b)
-
-(defn Foo.bar [foo] (IO.puts foo) foo)
-
-(let [f (Foo.new 1 2)]
-  (IO.puts (Foo.bar f))
-  (IO.puts (Kernel.type f)))
-
-
-(let [v [1 2 3]]
-  (IO.puts (head v 4)))
-
-
-(module Main)
-
-; (defn new [a b] (CREATE Main a b))
-
-(Foo.new 1 2)
-
 (defn reduce [vector init func]
   (let [current (head vector)
         result (func current init)]
@@ -28,11 +9,14 @@
 (defn reverse [sequence]
   (-> sequence
     (Enumerable.reduce (fn [acc item]
-      (cons acc item)))))
+      (conj acc item)))))
 
 (defn map [sequence func]
   (-> sequence
-    (Enumerable.reduce (list)
+    (Enumerable.reduce (List.new)
       (fn [acc item]
-        (cons acc (func item))))
+        (conj acc (func item))))
     reverse))
+
+(let [l (List.new 1 2 3)]
+  (IO.puts (head l)))

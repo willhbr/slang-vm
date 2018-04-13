@@ -35,7 +35,7 @@ class Identifier
     'true',
     'false',
     'nil',
-    'deftype',
+    'new-type',
     'new-instance',
     'defprotocol',
     'recur'

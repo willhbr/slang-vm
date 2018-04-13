@@ -7,7 +7,6 @@ var stringType = Type{Name: "String"}
 var boolType = Type{Name: "Bool"}
 var moduleType = Type{Name: "Module"}
 var atomType = Type{Name: "Atom"}
-var listType = Type{Name: "List"}
 var mapType = Type{Name: "Map"}
 
 var NilType = Type{Name: "Nil"}
@@ -30,7 +29,7 @@ func GetType(thing interface{}) *Type {
 	case *Vector:
 		return VectorType
 	case *List:
-		return &listType
+		return ListType
 	case *Map:
 		return &mapType
 	default:

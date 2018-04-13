@@ -21,6 +21,7 @@ deftype :Channel do
 end
 
 defmodule :Sequence do
+  defprotocol :cons
   defprotocol :conj
   defprotocol :head
   defprotocol :tail
@@ -28,6 +29,13 @@ end
 
 defmodule :Enumerable do
   defprotocol :reduce
+end
+
+deftype :List do
+  defn :new
+  defimpl :conj, of: [:Sequence, :conj]
+  defimpl :head, of: [:Sequence, :head]
+  defimpl :tail, of: [:Sequence, :tail]
 end
 
 deftype :Vector do

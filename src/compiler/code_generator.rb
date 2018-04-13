@@ -167,7 +167,7 @@ class CodeGenerator
         # TODO should this work as Module.method or just method?
         name = ast[1]
         push Code.PROTOCOL_CLOSURE(name.code, name.whole)
-      when 'deftype'
+      when 'new-type'
         name = ast[1]
         attrs = ast[2..-1]
         str = @program.add_string(name.whole)

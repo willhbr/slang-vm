@@ -1,3 +1,4 @@
+require 'set'
 require_relative './objects'
 require_relative './builtins'
 require_relative './ast_processor'
@@ -39,7 +40,7 @@ class MacroExpander
       attrs = ast[2..-1]
       args = (0...attrs.size).map { |a| kw(:"arg_#{a}") }
       [kw(:do),
-        ast,
+        [from(deftype, 'new-type')] + ast[1..-1],
         [kw(:def), from(name, :"#{name.whole}.new"),
           [kw(:fn), vec(*args),
             [kw(:"new-instance"), name] + args]]]
@@ -58,8 +59,7 @@ class MacroExpander
     return unless first
     if first.is_a? Identifier
       if macro = @macros[first.whole]
-        # TODO make 'deftype' something different after macro
-        return process(macro.(ast)
+        return process(macro.(ast))
       end
     end
     ast.map { |node| process(node) }

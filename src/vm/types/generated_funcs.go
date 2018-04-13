@@ -28,22 +28,34 @@ GoClosure{Function: Channel__send},
 GoClosure{Function: Channel__receive},
 // Sequence: 13
 Module{Name: "Sequence"},
-// Sequence.conj: 14
+// Sequence.cons: 14
 ProtocolClosure{ID: 14},
-// Sequence.head: 15
+// Sequence.conj: 15
 ProtocolClosure{ID: 15},
-// Sequence.tail: 16
+// Sequence.head: 16
 ProtocolClosure{ID: 16},
-// Enumerable: 17
+// Sequence.tail: 17
+ProtocolClosure{ID: 17},
+// Enumerable: 18
 Module{Name: "Enumerable"},
-// Enumerable.reduce: 18
-ProtocolClosure{ID: 18},
-// Vector: 19
+// Enumerable.reduce: 19
+ProtocolClosure{ID: 19},
+// List: 20
+ListType,
+// List.new: 21
+GoClosure{Function: List__new},
+// List.conj: 22
+GoClosure{Function: List__conj},
+// List.head: 23
+GoClosure{Function: List__head},
+// List.tail: 24
+GoClosure{Function: List__tail},
+// Vector: 25
 VectorType,
-// Vector.conj: 20
+// Vector.conj: 26
 GoClosure{Function: Vector__conj},
-// Vector.head: 21
+// Vector.head: 27
 GoClosure{Function: Vector__head},
-// Vector.tail: 22
+// Vector.tail: 28
 GoClosure{Function: Vector__tail},
 }

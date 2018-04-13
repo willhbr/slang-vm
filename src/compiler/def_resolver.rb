@@ -36,6 +36,8 @@ class DefResolver
       use! mod
       return
     end
+    puts @current_module.inspect
+    puts "Current defs: #{Defs.lookup_module_defs(@current_module, @current_module.whole).inspect}"
     raise "Undefined var: #{ast.whole} #{ast.location}"
   end
 
@@ -88,7 +90,7 @@ class DefResolver
           raise "Already defined #{name.whole} on #{name.location}"
         end
         Defs.def_def(mod, name)
-      when 'deftype'
+      when 'new-type'
         raise "Can only def at top-level" unless top_level
         name = ast[1]
         raise "Name must be identifier" unless name.is_a? Identifier
