@@ -139,25 +139,25 @@ func float32Hash(x float32) uint32 {
 /// Vector ///
 //////////////
 
-// A Vector is an ordered persistent/immutable collection of items corresponding roughly
+// A VectorImpl is an ordered persistent/immutable collection of items corresponding roughly
 // to the use cases for a slice.
-type Vector struct {
+type VectorImpl struct {
 	tail  []Value
 	root  commonNode
 	len   uint
 	shift uint
 }
 
-var emptyVectorTail = make([]Value, 0)
-var emptyVector *Vector = &Vector{root: emptyCommonNode, shift: shiftSize, tail: emptyVectorTail}
+var emptyVectorImplTail = make([]Value, 0)
+var emptyVectorImpl *VectorImpl = &VectorImpl{root: emptyCommonNode, shift: shiftSize, tail: emptyVectorImplTail}
 
-// NewVector returns a new Vector containing the items provided in items.
-func NewVector(items ...Value) *Vector {
-	return emptyVector.Append(items...)
+// NewVectorImpl returns a new VectorImpl containing the items provided in items.
+func NewVectorImpl(items ...Value) *VectorImpl {
+	return emptyVectorImpl.Append(items...)
 }
 
 // Get returns the element at position i.
-func (v *Vector) Get(i int) Value {
+func (v *VectorImpl) Get(i int) Value {
 	if i < 0 || uint(i) >= v.len {
 		panic("Index out of bounds")
 	}
@@ -165,7 +165,7 @@ func (v *Vector) Get(i int) Value {
 	return v.sliceFor(uint(i))[i&shiftBitMask]
 }
 
-func (v *Vector) sliceFor(i uint) []Value {
+func (v *VectorImpl) sliceFor(i uint) []Value {
 	if i >= v.tailOffset() {
 		return v.tail
 	}
@@ -178,7 +178,7 @@ func (v *Vector) sliceFor(i uint) []Value {
 	return node.([]Value)
 }
 
-func (v *Vector) tailOffset() uint {
+func (v *VectorImpl) tailOffset() uint {
 	if v.len < nodeSize {
 		return 0
 	}
@@ -187,7 +187,7 @@ func (v *Vector) tailOffset() uint {
 }
 
 // Set returns a new vector with the element at position i set to item.
-func (v *Vector) Set(i int, item Value) *Vector {
+func (v *VectorImpl) Set(i int, item Value) *VectorImpl {
 	if i < 0 || uint(i) >= v.len {
 		panic("Index out of bounds")
 	}
@@ -196,13 +196,13 @@ func (v *Vector) Set(i int, item Value) *Vector {
 		newTail := make([]Value, len(v.tail))
 		copy(newTail, v.tail)
 		newTail[i&shiftBitMask] = item
-		return &Vector{root: v.root, tail: newTail, len: v.len, shift: v.shift}
+		return &VectorImpl{root: v.root, tail: newTail, len: v.len, shift: v.shift}
 	}
 
-	return &Vector{root: v.doAssoc(v.shift, v.root, uint(i), item), tail: v.tail, len: v.len, shift: v.shift}
+	return &VectorImpl{root: v.doAssoc(v.shift, v.root, uint(i), item), tail: v.tail, len: v.len, shift: v.shift}
 }
 
-func (v *Vector) doAssoc(level uint, node commonNode, i uint, item Value) commonNode {
+func (v *VectorImpl) doAssoc(level uint, node commonNode, i uint, item Value) commonNode {
 	if level == 0 {
 		ret := make([]Value, nodeSize)
 		copy(ret, node.([]Value))
@@ -217,7 +217,7 @@ func (v *Vector) doAssoc(level uint, node commonNode, i uint, item Value) common
 	return ret
 }
 
-func (v *Vector) pushTail(level uint, parent commonNode, tailNode []Value) commonNode {
+func (v *VectorImpl) pushTail(level uint, parent commonNode, tailNode []Value) commonNode {
 	subIdx := ((v.len - 1) >> level) & shiftBitMask
 	parentNode := parent.([]commonNode)
 	ret := make([]commonNode, subIdx+1)
@@ -237,7 +237,7 @@ func (v *Vector) pushTail(level uint, parent commonNode, tailNode []Value) commo
 }
 
 // Append returns a new vector with item(s) appended to it.
-func (v *Vector) Append(item ...Value) *Vector {
+func (v *VectorImpl) Append(item ...Value) *VectorImpl {
 	result := v
 	itemLen := uint(len(item))
 	for insertOffset := uint(0); insertOffset < itemLen; {
@@ -245,7 +245,7 @@ func (v *Vector) Append(item ...Value) *Vector {
 		tailFree := nodeSize - tailLen
 		if tailFree == 0 {
 			result = result.pushLeafNode(result.tail)
-			result.tail = emptyVector.tail
+			result.tail = emptyVectorImpl.tail
 			tailFree = nodeSize
 			tailLen = 0
 		}
@@ -254,14 +254,14 @@ func (v *Vector) Append(item ...Value) *Vector {
 		newTail := make([]Value, 0, tailLen+batchLen)
 		newTail = append(newTail, result.tail...)
 		newTail = append(newTail, item[insertOffset:insertOffset+batchLen]...)
-		result = &Vector{root: result.root, tail: newTail, len: result.len + batchLen, shift: result.shift}
+		result = &VectorImpl{root: result.root, tail: newTail, len: result.len + batchLen, shift: result.shift}
 		insertOffset += batchLen
 	}
 
 	return result
 }
 
-func (v *Vector) pushLeafNode(node []Value) *Vector {
+func (v *VectorImpl) pushLeafNode(node []Value) *VectorImpl {
 	var newRoot commonNode
 	newShift := v.shift
 
@@ -274,23 +274,23 @@ func (v *Vector) pushLeafNode(node []Value) *Vector {
 		newRoot = v.pushTail(v.shift, v.root, node)
 	}
 
-	return &Vector{root: newRoot, tail: v.tail, len: v.len, shift: newShift}
+	return &VectorImpl{root: newRoot, tail: v.tail, len: v.len, shift: newShift}
 }
 
-// Slice returns a VectorSlice that refers to all elements [start,stop) in v.
-func (v *Vector) Slice(start, stop int) *VectorSlice {
+// Slice returns a VectorImplSlice that refers to all elements [start,stop) in v.
+func (v *VectorImpl) Slice(start, stop int) *VectorImplSlice {
 	assertSliceOk(start, stop, v.Len())
-	return &VectorSlice{vector: v, start: start, stop: stop}
+	return &VectorImplSlice{vector: v, start: start, stop: stop}
 }
 
 // Len returns the length of v.
-func (v *Vector) Len() int {
+func (v *VectorImpl) Len() int {
 	return int(v.len)
 }
 
 // Range calls f repeatedly passing it each element in v in order as argument until either
 // all elements have been visited or f returns false.
-func (v *Vector) Range(f func(Value) bool) {
+func (v *VectorImpl) Range(f func(Value) bool) {
 	var currentNode []Value
 	for i := uint(0); i < v.len; i++ {
 		if i&shiftBitMask == 0 {
@@ -304,7 +304,7 @@ func (v *Vector) Range(f func(Value) bool) {
 }
 
 // ToNativeSlice returns a Go slice containing all elements of v
-func (v *Vector) ToNativeSlice() []Value {
+func (v *VectorImpl) ToNativeSlice() []Value {
 	result := make([]Value, 0, v.len)
 	for i := uint(0); i < v.len; i += nodeSize {
 		result = append(result, v.sliceFor(i)...)
@@ -317,24 +317,24 @@ func (v *Vector) ToNativeSlice() []Value {
 //// Slice /////
 ////////////////
 
-// VectorSlice is a slice type backed by a Vector.
-type VectorSlice struct {
-	vector      *Vector
+// VectorImplSlice is a slice type backed by a VectorImpl.
+type VectorImplSlice struct {
+	vector      *VectorImpl
 	start, stop int
 }
 
-// NewVectorSlice returns a new NewVectorSlice containing the items provided in items.
-func NewVectorSlice(items ...Value) *VectorSlice {
-	return &VectorSlice{vector: emptyVector.Append(items...), start: 0, stop: len(items)}
+// NewVectorImplSlice returns a new NewVectorImplSlice containing the items provided in items.
+func NewVectorImplSlice(items ...Value) *VectorImplSlice {
+	return &VectorImplSlice{vector: emptyVectorImpl.Append(items...), start: 0, stop: len(items)}
 }
 
 // Len returns the length of s.
-func (s *VectorSlice) Len() int {
+func (s *VectorImplSlice) Len() int {
 	return s.stop - s.start
 }
 
 // Get returns the element at position i.
-func (s *VectorSlice) Get(i int) Value {
+func (s *VectorImplSlice) Get(i int) Value {
 	if i < 0 || s.start+i >= s.stop {
 		panic("Index out of bounds")
 	}
@@ -343,7 +343,7 @@ func (s *VectorSlice) Get(i int) Value {
 }
 
 // Set returns a new slice with the element at position i set to item.
-func (s *VectorSlice) Set(i int, item Value) *VectorSlice {
+func (s *VectorImplSlice) Set(i int, item Value) *VectorImplSlice {
 	if i < 0 || s.start+i >= s.stop {
 		panic("Index out of bounds")
 	}
@@ -352,8 +352,8 @@ func (s *VectorSlice) Set(i int, item Value) *VectorSlice {
 }
 
 // Append returns a new slice with item(s) appended to it.
-func (s *VectorSlice) Append(items ...Value) *VectorSlice {
-	newSlice := VectorSlice{vector: s.vector, start: s.start, stop: s.stop + len(items)}
+func (s *VectorImplSlice) Append(items ...Value) *VectorImplSlice {
+	newSlice := VectorImplSlice{vector: s.vector, start: s.start, stop: s.stop + len(items)}
 
 	// If this is v slice that has an upper bound that is lower than the backing
 	// vector then set the values in the backing vector to achieve some structural
@@ -368,15 +368,15 @@ func (s *VectorSlice) Append(items ...Value) *VectorSlice {
 	return &newSlice
 }
 
-// Slice returns a VectorSlice that refers to all elements [start,stop) in s.
-func (s *VectorSlice) Slice(start, stop int) *VectorSlice {
+// Slice returns a VectorImplSlice that refers to all elements [start,stop) in s.
+func (s *VectorImplSlice) Slice(start, stop int) *VectorImplSlice {
 	assertSliceOk(start, stop, s.stop-s.start)
-	return &VectorSlice{vector: s.vector, start: s.start + start, stop: s.start + stop}
+	return &VectorImplSlice{vector: s.vector, start: s.start + start, stop: s.start + stop}
 }
 
 // Range calls f repeatedly passing it each element in s in order as argument until either
 // all elements have been visited or f returns false.
-func (s *VectorSlice) Range(f func(Value) bool) {
+func (s *VectorImplSlice) Range(f func(Value) bool) {
 	var currentNode []Value
 	for i := uint(s.start); i < uint(s.stop); i++ {
 		if i&shiftBitMask == 0 || i == uint(s.start) {

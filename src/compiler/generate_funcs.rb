@@ -30,8 +30,8 @@ end
 
 def to_go_name(str)
   {
-    '->' => 'arrow',
-    '<-' => 'reverseArrow',
+    '->' => '_rArr_',
+    '<-' => '_lArr_',
     '<' => 'lessThan',
     '-' => 'minus',
     '*' => 'times'
@@ -55,5 +55,24 @@ if __FILE__==$0
     Def::BUILTIN_DEFS.select { |d| d.type == :type }.each do |d|
       d.generate_type_with_impls(file)
     end
+
+    file.puts """
+    func GetType(object Value) *Type {
+      switch object.(type) {
+    """
+    Def::BUILTIN_DEFS.select { |d| d.type == :type }.each do |d|
+      file.puts """
+      case #{d.name}:
+        return #{d.name}Type
+      """
+    end
+    file.puts """
+    case Instance:
+      return object.(Instance).Type
+    default:
+      println(object)
+      panic(\"Can't find type of object\")
+    }}
+    """
   end
 end

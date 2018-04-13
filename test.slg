@@ -1,22 +1,12 @@
 (module Main)
-(import Sequence)
 
-(defn reduce [vector init func]
-  (let [current (head vector)
-        result (func current init)]
-    (recur (tail vector) result func)))
+(defn print-all-types [types]
+  (-> types
+    Vector.head
+    Kernel.type
+    IO.puts)
+  (if (Vector.head types)
+    (recur (Vector.tail types)))
+    nil)
 
-(defn reverse [sequence]
-  (-> sequence
-    (Enumerable.reduce (fn [acc item]
-      (conj acc item)))))
-
-(defn map [sequence func]
-  (-> sequence
-    (Enumerable.reduce (List.new)
-      (fn [acc item]
-        (conj acc (func item))))
-    reverse))
-
-(let [l (List.new 1 2 3)]
-  (IO.puts (head l)))
+(print-all-types [1 "hello" [1 2 3] (List.new 1 2 3)])

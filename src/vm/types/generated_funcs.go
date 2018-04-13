@@ -1,61 +1,65 @@
 package types
 var Defs = []Value {
-// IO: 0
+// Printable: 0
+Module{Name: "Printable"},
+// Printable.->string: 1
+ProtocolClosure{ID: 1},
+// IO: 2
 Module{Name: "IO"},
-// IO.puts: 1
+// IO.puts: 3
 GoClosure{Function: IO__puts},
-// IO.gets: 2
+// IO.gets: 4
 GoClosure{Function: IO__gets},
-// Kernel: 3
+// Kernel: 5
 Module{Name: "Kernel"},
-// Kernel.type: 4
+// Kernel.type: 6
 GoClosure{Function: Kernel__type},
-// Kernel.<: 5
+// Kernel.<: 7
 GoClosure{Function: Kernel__lessThan},
-// Kernel.-: 6
+// Kernel.-: 8
 GoClosure{Function: Kernel__minus},
-// Kernel.*: 7
+// Kernel.*: 9
 GoClosure{Function: Kernel__times},
-// Kernel.conj: 8
-GoClosure{Function: Kernel__conj},
-// Channel: 9
+// Int: 10
+IntType,
+// String: 11
+StringType,
+// Channel: 12
 ChannelType,
-// Channel.new: 10
+// Channel.new: 13
 GoClosure{Function: Channel__new},
-// Channel.send: 11
+// Channel.send: 14
 GoClosure{Function: Channel__send},
-// Channel.receive: 12
+// Channel.receive: 15
 GoClosure{Function: Channel__receive},
-// Sequence: 13
+// Sequence: 16
 Module{Name: "Sequence"},
-// Sequence.cons: 14
-ProtocolClosure{ID: 14},
-// Sequence.conj: 15
-ProtocolClosure{ID: 15},
-// Sequence.head: 16
-ProtocolClosure{ID: 16},
-// Sequence.tail: 17
+// Sequence.conj: 17
 ProtocolClosure{ID: 17},
-// Enumerable: 18
-Module{Name: "Enumerable"},
-// Enumerable.reduce: 19
+// Sequence.head: 18
+ProtocolClosure{ID: 18},
+// Sequence.tail: 19
 ProtocolClosure{ID: 19},
-// List: 20
+// Enumerable: 20
+Module{Name: "Enumerable"},
+// Enumerable.reduce: 21
+ProtocolClosure{ID: 21},
+// List: 22
 ListType,
-// List.new: 21
-GoClosure{Function: List__new},
-// List.conj: 22
+// List.conj: 23
 GoClosure{Function: List__conj},
-// List.head: 23
+// List.head: 24
 GoClosure{Function: List__head},
-// List.tail: 24
+// List.tail: 25
 GoClosure{Function: List__tail},
-// Vector: 25
+// List.new: 26
+GoClosure{Function: List__new},
+// Vector: 27
 VectorType,
-// Vector.conj: 26
+// Vector.conj: 28
 GoClosure{Function: Vector__conj},
-// Vector.head: 27
+// Vector.head: 29
 GoClosure{Function: Vector__head},
-// Vector.tail: 28
+// Vector.tail: 30
 GoClosure{Function: Vector__tail},
 }

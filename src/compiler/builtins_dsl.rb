@@ -30,7 +30,7 @@ class Def
   end
 
   def defimpl(name, options={})
-    raise "Can't define #{name} inside of #{@type}: #{@name}" unless @type == :module || @type == :type
+    raise "Can't define #{name} inside of #{@type}: #{@name}" unless @type == :type
     d = Def.new name
     d.module = self
     d.type = :impl
@@ -51,6 +51,17 @@ class Def
     protos = (@@protocols[@name] ||= Hash.new)
     protos[name] = d
     @children << d
+  end
+
+  def defimpls(*mods)
+    raise "Can't define #{name} inside of #{@type}: #{@name}" unless @type == :type
+    mods.each do |mod|
+      methods = @@protocols[mod]
+      raise "Protocol not found #{mod}" unless methods
+      methods.values.each do |method|
+        self.defimpl(method.name.to_sym, of: [mod, method.name.to_sym])
+      end
+    end
   end
 
   def self.assign_codes

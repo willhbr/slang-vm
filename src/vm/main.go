@@ -105,7 +105,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 			idx := program[index]
 			index++
 			str := strings[idx]
-			co.Stack.Push(types.Value(str))
+			co.Stack.Push(types.String(str))
 		case op.CONST_TRUE:
 			co.Stack.Push(types.Value(true))
 		case op.CONST_FALSE:
@@ -124,8 +124,13 @@ func Run(co *vm.Coroutine, startIndex int) {
 			increase := program[index]
 			index++
 			cond := co.Stack.Pop()
-			if cond != true {
+			if cond == false {
 				index += int(increase)
+			} else {
+				asNil, ok := cond.(types.Instance)
+				if ok && asNil.Type == types.NilType {
+					index += int(increase)
+				}
 			}
 		case op.RETURN:
 			currentFrame = currentFrame.CallingFrame

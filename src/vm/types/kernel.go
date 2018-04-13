@@ -26,11 +26,3 @@ func Kernel__times(arguments ...Value) Value {
 	result.Mul(arguments[0].(*big.Int), arguments[1].(*big.Int))
 	return &result
 }
-
-func Kernel__conj(arguments ...Value) Value {
-	vec := arguments[0].(*Vector)
-	for i := 1; i < len(arguments); i++ {
-		vec = vec.Append(arguments[i])
-	}
-	return vec
-}

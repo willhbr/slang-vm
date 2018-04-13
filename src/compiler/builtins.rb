@@ -1,5 +1,9 @@
 require_relative './builtins_dsl'
 
+defmodule :Printable do
+  defprotocol :"->string"
+end
+
 defmodule :IO do
   defn :puts
   defn :gets
@@ -10,7 +14,12 @@ defmodule :Kernel do
   defn :<
   defn :-
   defn :*
-  defn :conj
+end
+
+deftype :Int do
+end
+
+deftype :String do
 end
 
 deftype :Channel do
@@ -21,7 +30,6 @@ deftype :Channel do
 end
 
 defmodule :Sequence do
-  defprotocol :cons
   defprotocol :conj
   defprotocol :head
   defprotocol :tail
@@ -32,16 +40,12 @@ defmodule :Enumerable do
 end
 
 deftype :List do
+  defimpls :Sequence
   defn :new
-  defimpl :conj, of: [:Sequence, :conj]
-  defimpl :head, of: [:Sequence, :head]
-  defimpl :tail, of: [:Sequence, :tail]
 end
 
 deftype :Vector do
-  defimpl :conj, of: [:Sequence, :conj]
-  defimpl :head, of: [:Sequence, :head]
-  defimpl :tail, of: [:Sequence, :tail]
+  defimpls :Sequence
 end
 
 Def.assign_codes
