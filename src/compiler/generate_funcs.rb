@@ -52,6 +52,7 @@ if __FILE__==$0
 
   File.open(ARGV[1], 'w') do |file|
     file.puts "package types"
+    file.puts 'import "math/big"'
     Def::BUILTIN_DEFS.select { |d| d.type == :type }.each do |d|
       d.generate_type_with_impls(file)
     end
@@ -61,10 +62,12 @@ if __FILE__==$0
       switch object.(type) {
     """
     Def::BUILTIN_DEFS.select { |d| d.type == :type }.each do |d|
-      file.puts """
-      case #{d.name}:
-        return #{d.name}Type
-      """
+      if d.gotype
+        file.puts "case #{d.gotype}:"
+      else
+        file.puts "case #{d.name}:"
+      end
+      file.puts "return #{d.name}Type"
     end
     file.puts """
     case Instance:

@@ -16,13 +16,13 @@ defmodule :Kernel do
   defn :*
 end
 
-deftype :Int do
+deftype :Int, 'big.Int' do
 end
 
-deftype :String do
+deftype :String, 'string' do
 end
 
-deftype :Channel do
+deftype :Channel, 'chan Value' do
   defn :new
   defn :send
   defn :receive

@@ -1,12 +1,18 @@
 (module Main)
+(import Sequence)
+(import Kernel)
 
-(defn print-all-types [types]
-  (-> types
-    Vector.head
-    Kernel.type
-    IO.puts)
-  (if (Vector.head types)
-    (recur (Vector.tail types)))
-    nil)
+(defn reduce [collection init func]
+  (let [hd (head collection)]
+    (if hd
+      (recur (tail collection) (func init hd) func)
+      init)))
 
-(print-all-types [1 "hello" [1 2 3] (List.new 1 2 3)])
+(defn map [collection func]
+  (reduce collection []
+    (fn [acc val] (conj acc (func val)))))
+
+
+(-> [1 2 3]
+  (map (fn [a] (* a 2)))
+  IO.puts)

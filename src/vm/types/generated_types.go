@@ -1,4 +1,5 @@
 package types
+import "math/big"
 // Int: 10
 var IntType = &Type{Name: "Int",
 ProtocolMethods: map[int]Closure{
@@ -29,26 +30,16 @@ ProtocolMethods: map[int]Closure{
     func GetType(object Value) *Type {
       switch object.(type) {
     
-
-      case Int:
-        return IntType
-      
-
-      case String:
-        return StringType
-      
-
-      case Channel:
-        return ChannelType
-      
-
-      case List:
-        return ListType
-      
-
-      case Vector:
-        return VectorType
-      
+case big.Int:
+return IntType
+case string:
+return StringType
+case chan Value:
+return ChannelType
+case List:
+return ListType
+case Vector:
+return VectorType
 
     case Instance:
       return object.(Instance).Type

@@ -8,6 +8,7 @@ class Def
   attr_accessor :module
   attr_accessor :implements
   attr_accessor :type
+  attr_accessor :gotype
   attr_accessor :code
   attr_accessor :name
 
@@ -94,9 +95,10 @@ def defmodule(name, &block)
   mod.instance_exec(&block)
 end
 
-def deftype(name, &block)
+def deftype(name, gotype=nil, &block)
   mod = Def.new name.to_sym
   mod.type = :type
+  mod.gotype = gotype
   mod.instance_exec(&block)
 end
 

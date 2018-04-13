@@ -6,11 +6,11 @@ type Closure interface {
 	IsBuiltin() bool
 }
 
-func NewInt64(value int64) Int {
+func NewInt64(value int64) *big.Int {
 	return big.NewInt(value)
 }
 
-func NewInt(value uint8) Int {
+func NewInt(value uint8) *big.Int {
 	return big.NewInt(int64(value))
 }
 

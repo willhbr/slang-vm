@@ -105,7 +105,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 			idx := program[index]
 			index++
 			str := strings[idx]
-			co.Stack.Push(types.String(str))
+			co.Stack.Push(types.Value(str))
 		case op.CONST_TRUE:
 			co.Stack.Push(types.Value(true))
 		case op.CONST_FALSE:
