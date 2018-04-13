@@ -22,44 +22,48 @@ GoClosure{Function: Kernel__minus},
 GoClosure{Function: Kernel__times},
 // Int: 10
 IntType,
-// String: 11
+// Int.->string: 11
+GoClosure{Function: Int___rArr_string},
+// String: 12
 StringType,
-// Channel: 12
+// String.->string: 13
+GoClosure{Function: String___rArr_string},
+// Channel: 14
 ChannelType,
-// Channel.new: 13
+// Channel.new: 15
 GoClosure{Function: Channel__new},
-// Channel.send: 14
+// Channel.send: 16
 GoClosure{Function: Channel__send},
-// Channel.receive: 15
+// Channel.receive: 17
 GoClosure{Function: Channel__receive},
-// Sequence: 16
+// Sequence: 18
 Module{Name: "Sequence"},
-// Sequence.conj: 17
-ProtocolClosure{ID: 17},
-// Sequence.head: 18
-ProtocolClosure{ID: 18},
-// Sequence.tail: 19
+// Sequence.conj: 19
 ProtocolClosure{ID: 19},
-// Enumerable: 20
-Module{Name: "Enumerable"},
-// Enumerable.reduce: 21
+// Sequence.head: 20
+ProtocolClosure{ID: 20},
+// Sequence.tail: 21
 ProtocolClosure{ID: 21},
-// List: 22
+// Enumerable: 22
+Module{Name: "Enumerable"},
+// Enumerable.reduce: 23
+ProtocolClosure{ID: 23},
+// List: 24
 ListType,
-// List.conj: 23
+// List.conj: 25
 GoClosure{Function: List__conj},
-// List.head: 24
+// List.head: 26
 GoClosure{Function: List__head},
-// List.tail: 25
+// List.tail: 27
 GoClosure{Function: List__tail},
-// List.new: 26
+// List.new: 28
 GoClosure{Function: List__new},
-// Vector: 27
+// Vector: 29
 VectorType,
-// Vector.conj: 28
+// Vector.conj: 30
 GoClosure{Function: Vector__conj},
-// Vector.head: 29
+// Vector.head: 31
 GoClosure{Function: Vector__head},
-// Vector.tail: 30
+// Vector.tail: 32
 GoClosure{Function: Vector__tail},
 }

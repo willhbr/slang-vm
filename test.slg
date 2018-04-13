@@ -1,4 +1,5 @@
 (module Main)
+(import Printable)
 (import Sequence)
 (import Kernel)
 
@@ -14,5 +15,5 @@
 
 
 (-> [1 2 3]
-  (map (fn [a] (* a 2)))
+  (map (fn [a] (-> a ->string IO.puts)))
   IO.puts)

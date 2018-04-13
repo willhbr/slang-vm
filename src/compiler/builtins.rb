@@ -16,10 +16,12 @@ defmodule :Kernel do
   defn :*
 end
 
-deftype :Int, 'big.Int' do
+deftype :Int, '*big.Int' do
+  defimpls :Printable
 end
 
 deftype :String, 'string' do
+  defimpls :Printable
 end
 
 deftype :Channel, 'chan Value' do
