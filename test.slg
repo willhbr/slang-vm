@@ -5,7 +5,7 @@
   (-> :foo
       Atom.value
       IO.puts)
-  (raise "Oh shit")
+  (raise 5)
   (catch error
     (IO.puts error)))
 

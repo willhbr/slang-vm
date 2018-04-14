@@ -48,22 +48,22 @@ class CodeGenerator
       push Code.CONST_NIL
     else
       if ast.local?
-        push Code.LOAD_LOCAL(ast.code, ast.whole)
+        push Code.LOAD_LOCAL(Arg.local(ast.code, ast.whole))
       else
-        push Code.LOAD_DEF(ast.code, ast.whole)
+        push Code.LOAD_DEF(Arg.global(ast.code, ast.whole))
       end
     end
   end
 
   def process_string(ast, top_level)
     code = @program.add_string(ast)      
-    push Code.CONST_S(code, ast)
+    push Code.CONST_S(Arg.string(code, ast))
   end
 
   def process_atom(ast, top_level)
     # TODO Use other set of IDs for atoms
     code = new_atom(ast)
-    push Code.CONST_A(code, ast)
+    push Code.CONST_A(Arg.atom(code, ast))
   end
 
   def new_atom(ast)
@@ -74,9 +74,9 @@ class CodeGenerator
     if ast > 255 || ast < 0
       # Encode as big endian, 64-bit (8 bytes) signed
       # TODO do this in a non-shitty way
-      push Code.CONST_I_BIG([ ast ].pack('Q>').split('').map(&:ord), ast.to_s)
+      push Code.CONST_I_BIG(Arg.integer(ast))
     else
-      push Code.CONST_I(ast)
+      push Code.CONST_I(Arg.integer(ast))
     end
   end
 
@@ -114,7 +114,7 @@ class CodeGenerator
         str = @program.add_string(name.whole)
         # TODO make this do a module
         push Code.CONST_S(str, name.whole)
-        push Code.DEFINE(name.code, name.name_and_location)
+        push Code.DEFINE(Arg.global(name.code, name.name_and_location))
         @value_on_stack = false
       when 'def'
         name = ast[1]
@@ -138,7 +138,7 @@ class CodeGenerator
         args = ast[1]
         captured = args.pop
         args.reverse.each do |arg|
-          push Code.STORE(arg.code, arg.whole)
+          push Code.STORE(Arg.local(arg.code, arg.whole))
         end
 
         body = ast[2..-1]

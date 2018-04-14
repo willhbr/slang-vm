@@ -72,6 +72,67 @@ class Program
   end
 end
 
+class Arg
+  def self.local(num, debug)
+    if num < 0 || num > 255
+      raise "Local arg code exceeds byte size: #{num} #{debug}"
+    end
+    new(:local, num, debug)
+  end
+
+  def self.global(num, debug)
+    # TODO increase to 2-4 bytes
+    if num < 0 || num > 255
+      raise "Global def code exceeds byte size: #{num} #{debug}"
+    end
+    new(:global, num, debug)
+  end
+
+  def self.string(num, debug)
+    # TODO increase to 2-4 bytes
+    if num < 0 || num > 255
+      raise "String code exceeds byte size: #{num} #{debug}"
+    end
+    new(:string, num, debug)
+  end
+
+  def self.atom(num, debug)
+    # TODO increase to 2-4 bytes
+    if num < 0 || num > 255
+      raise "Atom code exceeds byte size: #{num} #{debug}"
+    end
+    new(:atom, num, debug)
+  end
+
+  def self.integer(value)
+    new(:integer, value, value.to_s)
+  end
+
+  def initialize(type, code, debug)
+    @type = type
+    @code = code
+    @debug = debug
+  end
+
+  def bytes_into(buffer)
+    case @type
+    when :integer
+      if @code > 255 || @code < 0
+        [ @code ].pack('Q>').split('').each do |byte|
+          buffer << byte.ord
+        end
+      else
+        buffer << @code
+      end
+    else
+      buffer << @code
+    end
+  end
+
+  def to_s
+    "#{@code} (#{@debug})"
+  end
+end
 
 class Code
   LOAD_LOCAL = 1
@@ -138,7 +199,7 @@ class Code
     if @debug
       args = @args.zip(@debug).map { |a, d| "#{a}: #{d || '?'}" }.join("\t")
     else
-      args = @args.join("\t")
+      args = @args.map(&:to_s).join("\t")
     end
     '%4s %11s %s' % [pos.to_s, name, args]
   end
@@ -154,7 +215,11 @@ class Code
   def >>(buffer)
     buffer << @code
     @args.each do |arg|
-      buffer << arg
+      if arg.is_a?(Arg)
+        arg.bytes_into(buffer)
+      else
+        buffer << arg
+      end
     end
   end
 
