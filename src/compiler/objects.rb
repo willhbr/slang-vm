@@ -38,7 +38,8 @@ class Identifier
     'new-type',
     'new-instance',
     'defprotocol',
-    'recur'
+    'recur',
+    'impl'
   ]
 
   def self.from(other, new_value)

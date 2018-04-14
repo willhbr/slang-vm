@@ -187,6 +187,10 @@ class CodeGenerator
           process(attr)
         end
         push Code.INSTANCE([name.code, attrs.size], [name.whole, 'size'])
+      when 'impl'
+        method = ast[1]
+        # Record the method, target type & function
+        # write to output
       when 'do'
         ast[1..-1].each do |arg|
           process(arg)

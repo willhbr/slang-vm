@@ -1,19 +1,4 @@
 (module Main)
 (import Printable)
-(import Sequence)
-(import Kernel)
 
-(defn reduce [collection init func]
-  (let [hd (head collection)]
-    (if hd
-      (recur (tail collection) (func init hd) func)
-      init)))
-
-(defn map [collection func]
-  (reduce collection []
-    (fn [acc val] (conj acc (func val)))))
-
-
-(-> [1 2 3]
-  (map (fn [a] (-> a ->string IO.puts)))
-  IO.puts)
+(impl ->string Vector (fn [v] (-> v Sequence.head ->string)))

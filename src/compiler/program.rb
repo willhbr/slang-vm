@@ -99,6 +99,7 @@ class Code
   SPAWN = 22
   TYPE = 24
   INSTANCE = 25
+  IMPLEMENT = 26
 
   CODE_VALUES = Hash.new
   CODE_NAMES = Hash.new
