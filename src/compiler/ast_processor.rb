@@ -21,6 +21,10 @@ module ASTProcessor
       puts "#{('[ ' + self.class.to_s + ' ]').ljust(20, ' ')} #{ast.inspect}"
     end
     name = ast.class.to_s.downcase
+    if name == 'fixnum'
+      # Fix for ruby 2.3
+      name = 'integer'
+    end
     if self.respond_to? :"process_#{name}"
       self.send(:"process_#{name}", ast, top_level)
     elsif self.respond_to? :process_other
