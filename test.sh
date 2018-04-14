@@ -4,8 +4,6 @@ FLAGS='--show_instructions --show_modules --show_order --show_time'
 
 set -e
 
-./build.sh
-
 failure=''
 
 for suite in test/*; do
