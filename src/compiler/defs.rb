@@ -80,10 +80,20 @@ class Defs
   end
 
   def self.blank_def(mod_iden)
+    unless @@defs['Kernel']
+      @@kernel = @@defs['Kernel'] = {
+        __MODULE__: Identifier.new('Kernel', nil),
+        __ALIAS__: Hash.new,
+        __IMPORTS__: []
+      }
+      if mod_iden.whole == 'Kernel'
+        return @@defs['Kernel']
+      end
+    end
     {
       __MODULE__: mod_iden,
       __ALIAS__: Hash.new,
-      __IMPORTS__: Array.new
+      __IMPORTS__: [@@kernel]
     }
   end
 

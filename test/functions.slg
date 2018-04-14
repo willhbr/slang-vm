@@ -1,5 +1,4 @@
 (module Main)
-(import Kernel)
 
 (defn foo [a]
   (* a 2))

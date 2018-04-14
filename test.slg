@@ -2,7 +2,7 @@
 (import Printable)
 
 (try
-  (IO.puts "Hello!")
+  (IO.puts (* 2 3))
   (raise "Oh shit")
   (catch error
     (IO.puts error)))
