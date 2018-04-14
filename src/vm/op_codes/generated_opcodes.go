@@ -3,7 +3,6 @@ const (LOAD_LOCAL = 1
 LOAD_DEF = 2
 STORE = 3
 INVOKE = 4
-APPLY = 5
 CONST_I = 6
 CONST_I_BIG = 7
 CONST_S = 8
@@ -21,13 +20,13 @@ NEW_MAP = 18
 NEW_VECTOR = 19
 NEW_LIST = 20
 DEFINE = 21
-SPAWN = 22
 TYPE = 24
 INSTANCE = 25
 IMPLEMENT = 26
 RAISE = 27
 TRY = 28
 END_TRY = 29
+DISCARD = 30
 )
 func ToString(code byte) string {
 switch code {
@@ -35,7 +34,6 @@ case LOAD_LOCAL: return "LOAD_LOCAL"
 case LOAD_DEF: return "LOAD_DEF"
 case STORE: return "STORE"
 case INVOKE: return "INVOKE"
-case APPLY: return "APPLY"
 case CONST_I: return "CONST_I"
 case CONST_I_BIG: return "CONST_I_BIG"
 case CONST_S: return "CONST_S"
@@ -53,12 +51,12 @@ case NEW_MAP: return "NEW_MAP"
 case NEW_VECTOR: return "NEW_VECTOR"
 case NEW_LIST: return "NEW_LIST"
 case DEFINE: return "DEFINE"
-case SPAWN: return "SPAWN"
 case TYPE: return "TYPE"
 case INSTANCE: return "INSTANCE"
 case IMPLEMENT: return "IMPLEMENT"
 case RAISE: return "RAISE"
 case TRY: return "TRY"
 case END_TRY: return "END_TRY"
+case DISCARD: return "DISCARD"
 default: return "UNKNOWN"
 }}

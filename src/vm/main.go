@@ -78,16 +78,6 @@ func Run(co *vm.Coroutine, startIndex int) {
 					panic("Can't call a non-function")
 				}
 			}
-		case op.SPAWN:
-			skip := program[index]
-			index++
-			continueIndex := index
-			index += int(skip)
-			newCo := vm.NewCoroutine()
-			newCo.Program = co.Program
-			go Run(newCo, int(continueIndex))
-		case op.APPLY:
-			panic("Can't do APPLY yet")
 		case op.CONST_A:
 			value := program[index]
 			index++
@@ -240,6 +230,8 @@ func Run(co *vm.Coroutine, startIndex int) {
 			index++
 			closure := types.ProtocolClosure{ID: id}
 			types.Defs[id] = closure
+		case op.DISCARD:
+			co.Stack.Pop()
 		default:
 			panic(fmt.Errorf("Unknown instruction at %d: %d", index, program[index]))
 		}

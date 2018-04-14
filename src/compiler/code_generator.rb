@@ -12,6 +12,11 @@ class CodeGenerator
 
   def reset
     @func_recur_points = []
+    @value_on_stack = true
+  end
+
+  def done_statement(ast)
+    push Code.DISCARD if @value_on_stack
   end
 
   def process_vector(ast, top_level)
@@ -95,10 +100,14 @@ class CodeGenerator
           process(expr)
           push Code.STORE(name.code, name.name_and_location)
         end
-        ast[2..-1].each do |node|
+        ast[2..-2].each do |node|
           process(node)
+          push Code.DISCARD
         end
+        process(ast[-1])
+        push Code.DISCARD
       when 'alias', 'import'
+        @value_on_stack = false
         return
       when 'module'
         name = ast[1]
@@ -106,6 +115,7 @@ class CodeGenerator
         # TODO make this do a module
         push Code.CONST_S(str, name.whole)
         push Code.DEFINE(name.code, name.name_and_location)
+        @value_on_stack = false
       when 'def'
         name = ast[1]
         expr = ast[2]
@@ -113,6 +123,7 @@ class CodeGenerator
         raise 'def accepts 2 args' if ast.size > 3
         process(expr)
         push Code.DEFINE(name.code, name.name_and_location)
+        @value_on_stack = false
       when 'recur'
         ast[1..-1].each do |expr|
           process(expr)
@@ -217,9 +228,11 @@ class CodeGenerator
         end
         jump.args[0] = @program.position - error_start
       when 'do'
-        ast[1..-1].each do |arg|
+        ast[1..-2].each do |arg|
           process(arg)
+          push Code.DISCARD
         end
+        process(ast[-1])
       else
         ast[1..-1].each do |arg|
           process(arg)
@@ -230,11 +243,13 @@ class CodeGenerator
         push Code.INVOKE(arg_count, ast[0].is_a?(Identifier) ? ast[0].whole : nil)
       end
     else
-      puts "Woops: #{ast.inspect}"
-      ast.each do |arg|
+      ast[1..-1].each do |arg|
         process(arg)
       end
-      push Code.INVOKE(-1, 'apply')
+      process(ast[0])
+      # Minus one for function name
+      arg_count = ast.size - 1
+      push Code.INVOKE(arg_count, ast[0].is_a?(Identifier) ? ast[0].whole : nil)
     end
   end
 
