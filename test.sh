@@ -9,6 +9,7 @@ failure=''
 for suite in test/*; do
   if ruby src/compiler/main.rb "$suite.slgc" "$suite" $FLAGS; then
     bin/slang "$suite.slgc"
+    rm "$suite.slgc"
   else
     failure='failed'
     echo "$suite failed to compile"

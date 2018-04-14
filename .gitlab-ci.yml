@@ -1,6 +1,8 @@
-image: klshxsh/ruby-golang:latest
+image: codequest/ruby-golang
 
 before_script:
+  - go version
+  - ruby --version
   - ./build.sh
 
 test:
