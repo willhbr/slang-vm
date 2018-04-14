@@ -10,7 +10,12 @@ type Frame struct {
 	CallingFrame  *Frame
 	ContinueIndex int
 	StackPosition int
-	CatchIndexes  IntStack
+	CatchIndexes  CatchIndexStack
+}
+
+type CatchIndex struct {
+	Index     int
+	StackSize int
 }
 
 func NewFrame() *Frame {
@@ -18,7 +23,7 @@ func NewFrame() *Frame {
 		Registers:     make([]types.Value, 100, 100),
 		CallingFrame:  nil,
 		ContinueIndex: 0,
-		CatchIndexes:  IntStack{values: new([]int)},
+		CatchIndexes:  CatchIndexStack{values: new([]CatchIndex)},
 	}
 }
 
@@ -27,46 +32,43 @@ func NewFrameFrom(calling *Frame) *Frame {
 		Registers:     make([]types.Value, 100, 100),
 		CallingFrame:  calling,
 		ContinueIndex: 0,
-		CatchIndexes:  IntStack{values: new([]int)},
+		CatchIndexes:  CatchIndexStack{values: new([]CatchIndex)},
 	}
 }
 
 // lol no generics
-type IntStack struct {
-	values *[]int
+type CatchIndexStack struct {
+	values *[]CatchIndex
 }
 
-func (s IntStack) String() string {
+func NewCatchIndexStack() CatchIndexStack {
+	return CatchIndexStack{values: new([]CatchIndex)}
+}
+
+func (s CatchIndexStack) String() string {
 	return fmt.Sprintf("%+v", *s.values)
 }
 
-func (s *IntStack) Pop() int {
+func (s *CatchIndexStack) Pop() CatchIndex {
 	stack := *s.values
 	value, values := stack[len(stack)-1], stack[:len(stack)-1]
 	*s.values = values
 	return value
 }
 
-func (s *IntStack) Trim(newSize int) {
-	if newSize > len(*s.values) {
-		return
-	}
-	*s.values = (*s.values)[0:newSize]
-}
-
-func (s IntStack) IsEmpty() bool {
+func (s CatchIndexStack) IsEmpty() bool {
 	return len(*s.values) == 0
 }
 
-func (s IntStack) Push(val int) {
+func (s CatchIndexStack) Push(val CatchIndex) {
 	*s.values = append(*s.values, val)
 }
 
-func (s IntStack) Peek() int {
+func (s CatchIndexStack) Peek() CatchIndex {
 	return (*s.values)[len(*s.values)-1]
 }
 
-func (s IntStack) Len() int {
+func (s CatchIndexStack) Len() int {
 	return len(*s.values)
 }
 
@@ -90,6 +92,10 @@ func (s *Stack) Trim(newSize int) {
 		return
 	}
 	*s.values = (*s.values)[0:newSize]
+}
+
+func (s Stack) IsEmpty() bool {
+	return len(*s.values) == 0
 }
 
 func (s Stack) Push(val types.Value) {

@@ -143,24 +143,29 @@ func Run(co *vm.Coroutine, startIndex int) {
 			index = currentFrame.ContinueIndex
 		case op.RAISE:
 			// TODO Record some kind of error trace here
-			// err := co.Stack.Pop()
 			frame := currentFrame
+			err := co.Stack.Pop()
 			for {
 				if frame.CatchIndexes.IsEmpty() {
 					frame = frame.CallingFrame
 					if frame == nil {
-						err := co.Stack.Pop()
 						panic(types.NewSlangError(err))
 					}
 				} else {
-					index = frame.CatchIndexes.Pop()
+					catchIdx := frame.CatchIndexes.Pop()
+					index = catchIdx.Index
+					co.Stack.Trim(catchIdx.StackSize)
+					co.Stack.Push(err)
 					break
 				}
 			}
 		case op.TRY:
 			offset := int(program[index])
 			index++
-			currentFrame.CatchIndexes.Push(index + offset)
+			currentFrame.CatchIndexes.Push(vm.CatchIndex{
+				Index:     index + offset,
+				StackSize: co.Stack.Len(),
+			})
 		case op.END_TRY:
 			currentFrame.CatchIndexes.Pop()
 		case op.NEW_MAP:
@@ -280,4 +285,7 @@ func main() {
 	prog := vm.Program{Instructions: instructions[startIndex:], Strings: strings}
 	coroutine.Program = &prog
 	Run(coroutine, 0)
+	if !coroutine.Stack.IsEmpty() {
+		fmt.Println(coroutine.Stack)
+	}
 }
