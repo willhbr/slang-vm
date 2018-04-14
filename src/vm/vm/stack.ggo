@@ -1,0 +1,64 @@
+package vm
+
+import (
+  "../types"
+  "fmt"
+)
+
+// There is no God
+__GENERIC__
+__DOTYPES__{_TYPE_: types.Value, _NAME_: Value, _PTYPE_: types.Value, _REF_: }
+__DOTYPES__{_TYPE_: CatchIndex, _NAME_: CatchIndex, _PTYPE_: *CatchIndex, _REF_: &}
+
+type _NAME_Stack struct {
+	values *[]_TYPE_
+}
+
+func (s _NAME_Stack) String() string {
+	return fmt.Sprintf("%+v", *s.values)
+}
+
+func (s *_NAME_Stack) Pop() _TYPE_ {
+	stack := *s.values
+	value, values := stack[len(stack)-1], stack[:len(stack)-1]
+	*s.values = values
+	return value
+}
+
+func (s *_NAME_Stack) Trim(newSize int) {
+	if newSize > len(*s.values) {
+		return
+	}
+	*s.values = (*s.values)[0:newSize]
+}
+
+func (s _NAME_Stack) IsEmpty() bool {
+	return len(*s.values) == 0
+}
+
+func (s _NAME_Stack) Push(val _TYPE_) {
+	*s.values = append(*s.values, val)
+}
+
+func (s _NAME_Stack) Peek() _TYPE_ {
+	return (*s.values)[len(*s.values)-1]
+}
+
+func (s _NAME_Stack) Len() int {
+	return len(*s.values)
+}
+
+// Get something a certain offset down, or false if out of range
+func (s _NAME_Stack) PeekFromTopMinus(distance int) (_PTYPE_, bool) {
+	idx := len(*s.values) - distance
+	if idx < 0 {
+		return nil, false
+	}
+	return _REF_(*s.values)[idx], true
+}
+
+func Make_NAME_Stack() _NAME_Stack {
+	vals := make([]_TYPE_, 0, 100)
+	return _NAME_Stack{values: &vals}
+}
+__ENDGENERIC__

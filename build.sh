@@ -7,6 +7,8 @@ if ! which peds > /dev/null; then
   go get github.com/tobgu/peds/cmd/peds
 fi
 
+ruby generics.rb src/vm
+
 back="$PWD"
 cd src/vm/op_codes
 go generate
