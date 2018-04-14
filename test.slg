@@ -2,7 +2,9 @@
 (import Printable)
 
 (try
-  (IO.puts (* 2 3))
+  (-> :foo
+      Atom.value
+      IO.puts)
   (raise "Oh shit")
   (catch error
     (IO.puts error)))

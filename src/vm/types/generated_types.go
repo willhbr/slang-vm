@@ -10,23 +10,28 @@ var StringType = &Type{Name: "String",
 ProtocolMethods: map[int]Closure{
 1: GoClosure{Function: String___rArr_string},
 }}
-// Channel: 14
+// Atom: 14
+var AtomType = &Type{Name: "Atom",
+ProtocolMethods: map[int]Closure{
+1: GoClosure{Function: Atom___rArr_string},
+}}
+// Channel: 17
 var ChannelType = &Type{Name: "Channel",
 ProtocolMethods: map[int]Closure{
 }}
-// List: 24
+// List: 27
 var ListType = &Type{Name: "List",
 ProtocolMethods: map[int]Closure{
-19: GoClosure{Function: List__conj},
-20: GoClosure{Function: List__head},
-21: GoClosure{Function: List__tail},
+22: GoClosure{Function: List__conj},
+23: GoClosure{Function: List__head},
+24: GoClosure{Function: List__tail},
 }}
-// Vector: 29
+// Vector: 32
 var VectorType = &Type{Name: "Vector",
 ProtocolMethods: map[int]Closure{
-19: GoClosure{Function: Vector__conj},
-20: GoClosure{Function: Vector__head},
-21: GoClosure{Function: Vector__tail},
+22: GoClosure{Function: Vector__conj},
+23: GoClosure{Function: Vector__head},
+24: GoClosure{Function: Vector__tail},
 }}
 
     func GetType(object Value) *Type {
@@ -36,6 +41,8 @@ case *big.Int:
 return IntType
 case string:
 return StringType
+case Atom:
+return AtomType
 case chan Value:
 return ChannelType
 case List:

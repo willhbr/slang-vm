@@ -44,7 +44,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 					for i := size - 1; i >= 0; i-- {
 						arguments[i] = co.Stack.Pop()
 					}
-					result, err := fun.(types.GoClosure).Function(arguments...)
+					result, err := fun.(types.GoClosure).Function(co.Program, arguments...)
 					// lol no errors
 					if err != nil {
 						// TODO jump to next error handle
@@ -274,7 +274,7 @@ func main() {
 	startIndex := 0
 	strings := ParseStrings(instructions, &startIndex)
 	ExpandDefsSlice(instructions, &startIndex)
-	prog := vm.Program{Instructions: instructions[startIndex:], Strings: strings}
+	prog := types.Program{Instructions: instructions[startIndex:], Strings: strings}
 	coroutine.Program = &prog
 	Run(coroutine, 0)
 	if !coroutine.Stack.IsEmpty() {

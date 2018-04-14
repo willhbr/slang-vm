@@ -24,6 +24,11 @@ deftype :String, 'string' do
   defimpls :Printable
 end
 
+deftype :Atom do
+  defimpls :Printable
+  defn :value
+end
+
 deftype :Channel, 'chan Value' do
   defn :new
   defn :send

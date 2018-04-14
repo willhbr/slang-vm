@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func IO__puts(arguments ...Value) (Value, error) {
+func IO__puts(_ *Program, arguments ...Value) (Value, error) {
 	for i := range arguments {
 		fmt.Print(arguments[i])
 	}
@@ -14,7 +14,7 @@ func IO__puts(arguments ...Value) (Value, error) {
 	return Nil, nil
 }
 
-func IO__gets(arguments ...Value) (Value, error) {
+func IO__gets(_ *Program, arguments ...Value) (Value, error) {
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	return text, nil

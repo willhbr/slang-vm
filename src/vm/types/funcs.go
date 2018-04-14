@@ -1,5 +1,10 @@
 package types
 
+type Program struct {
+	Instructions []byte
+	Strings      []string
+}
+
 type SlangClosure struct {
 	ProgramPosition uint
 	// TODO Replace this with a more efficient mapping
@@ -14,7 +19,7 @@ func NewSlangClosure(position uint) SlangClosure {
 }
 
 type GoClosure struct {
-	Function func(...Value) (Value, error)
+	Function func(*Program, ...Value) (Value, error)
 }
 
 type ProtocolClosure struct {

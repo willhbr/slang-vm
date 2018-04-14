@@ -88,7 +88,7 @@ class Scanner
     when '}'
       return sym(:"}")
     when ':'
-      iden = identifier
+      iden = atom
       return sym(:ATOM, iden)
     when ' ', "\t", ','
       return nil
@@ -138,6 +138,12 @@ class Scanner
 
   def identifier
     start = @index - 1
+    advance! while is_iden_middle(peek?)
+    return @contents[start..@index - 1]
+  end
+
+  def atom
+    start = @index
     advance! while is_iden_middle(peek?)
     return @contents[start..@index - 1]
   end

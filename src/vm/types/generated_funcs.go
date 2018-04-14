@@ -28,42 +28,48 @@ GoClosure{Function: Int___rArr_string},
 StringType,
 // String.->string: 13
 GoClosure{Function: String___rArr_string},
-// Channel: 14
+// Atom: 14
+AtomType,
+// Atom.->string: 15
+GoClosure{Function: Atom___rArr_string},
+// Atom.value: 16
+GoClosure{Function: Atom__value},
+// Channel: 17
 ChannelType,
-// Channel.new: 15
+// Channel.new: 18
 GoClosure{Function: Channel__new},
-// Channel.send: 16
+// Channel.send: 19
 GoClosure{Function: Channel__send},
-// Channel.receive: 17
+// Channel.receive: 20
 GoClosure{Function: Channel__receive},
-// Sequence: 18
+// Sequence: 21
 Module{Name: "Sequence"},
-// Sequence.conj: 19
-ProtocolClosure{ID: 19},
-// Sequence.head: 20
-ProtocolClosure{ID: 20},
-// Sequence.tail: 21
-ProtocolClosure{ID: 21},
-// Enumerable: 22
-Module{Name: "Enumerable"},
-// Enumerable.reduce: 23
+// Sequence.conj: 22
+ProtocolClosure{ID: 22},
+// Sequence.head: 23
 ProtocolClosure{ID: 23},
-// List: 24
+// Sequence.tail: 24
+ProtocolClosure{ID: 24},
+// Enumerable: 25
+Module{Name: "Enumerable"},
+// Enumerable.reduce: 26
+ProtocolClosure{ID: 26},
+// List: 27
 ListType,
-// List.conj: 25
+// List.conj: 28
 GoClosure{Function: List__conj},
-// List.head: 26
+// List.head: 29
 GoClosure{Function: List__head},
-// List.tail: 27
+// List.tail: 30
 GoClosure{Function: List__tail},
-// List.new: 28
+// List.new: 31
 GoClosure{Function: List__new},
-// Vector: 29
+// Vector: 32
 VectorType,
-// Vector.conj: 30
+// Vector.conj: 33
 GoClosure{Function: Vector__conj},
-// Vector.head: 31
+// Vector.head: 34
 GoClosure{Function: Vector__head},
-// Vector.tail: 32
+// Vector.tail: 35
 GoClosure{Function: Vector__tail},
 }

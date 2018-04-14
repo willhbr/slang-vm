@@ -38,12 +38,7 @@ func NewFrameFrom(calling *Frame) *Frame {
 type Coroutine struct {
 	Stack        ValueStack
 	CurrentFrame *Frame
-	Program      *Program
-}
-
-type Program struct {
-	Instructions []byte
-	Strings      []string
+	Program      *types.Program
 }
 
 func NewCoroutine() *Coroutine {
