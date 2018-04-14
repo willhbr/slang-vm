@@ -24,6 +24,10 @@ DEFINE = 21
 SPAWN = 22
 TYPE = 24
 INSTANCE = 25
+IMPLEMENT = 26
+RAISE = 27
+TRY = 28
+END_TRY = 29
 )
 func ToString(code byte) string {
 switch code {
@@ -52,5 +56,9 @@ case DEFINE: return "DEFINE"
 case SPAWN: return "SPAWN"
 case TYPE: return "TYPE"
 case INSTANCE: return "INSTANCE"
+case IMPLEMENT: return "IMPLEMENT"
+case RAISE: return "RAISE"
+case TRY: return "TRY"
+case END_TRY: return "END_TRY"
 default: return "UNKNOWN"
 }}

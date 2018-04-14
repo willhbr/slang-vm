@@ -188,9 +188,34 @@ class CodeGenerator
         end
         push Code.INSTANCE([name.code, attrs.size], [name.whole, 'size'])
       when 'impl'
-        method = ast[1]
+        # method = ast[1]
         # Record the method, target type & function
         # write to output
+      when 'raise'
+        process(ast[1])
+        push Code.RAISE()
+      when 'try'
+        content = ast[1..-2]
+        catch_block = ast[-1]
+        try = Code.TRY(-1)
+        push try
+        start = @program.position
+        content.each do |node|
+          process(node)
+        end
+        # Jump over the catch if successful
+        push Code.END_TRY
+        jump = Code.JUMP(-1)
+        push jump
+        try.args[0] = @program.position - start
+        error_start = @program.position
+        error = catch_block[1]
+        catch_code = catch_block[2..-1]
+        push Code.STORE(error.code, error.whole)
+        catch_code.each do |expr|
+          process(expr)
+        end
+        jump.args[0] = @program.position - error_start
       when 'do'
         ast[1..-1].each do |arg|
           process(arg)

@@ -4,25 +4,25 @@ import (
 	"math/big"
 )
 
-func Kernel__type(arguments ...Value) Value {
+func Kernel__type(arguments ...Value) (Value, error) {
 	if len(arguments) != 1 {
 		panic("Too many arguments to Kernel.type")
 	}
-	return GetType(arguments[0])
+	return GetType(arguments[0]), nil
 }
 
-func Kernel__minus(arguments ...Value) Value {
+func Kernel__minus(arguments ...Value) (Value, error) {
 	result := big.Int{}
 	result.Sub(arguments[0].(*big.Int), arguments[1].(*big.Int))
-	return &result
+	return &result, nil
 }
 
-func Kernel__lessThan(arguments ...Value) Value {
-	return arguments[0].(*big.Int).Cmp(arguments[1].(*big.Int)) == -1
+func Kernel__lessThan(arguments ...Value) (Value, error) {
+	return arguments[0].(*big.Int).Cmp(arguments[1].(*big.Int)) == -1, nil
 }
 
-func Kernel__times(arguments ...Value) Value {
+func Kernel__times(arguments ...Value) (Value, error) {
 	result := big.Int{}
 	result.Mul(arguments[0].(*big.Int), arguments[1].(*big.Int))
-	return &result
+	return &result, nil
 }

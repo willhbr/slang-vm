@@ -1,4 +1,9 @@
 (module Main)
 (import Printable)
 
-(impl ->string Vector (fn [v] (-> v Sequence.head ->string)))
+(try
+  (IO.puts "Hello!")
+  (raise "Oh shit")
+  (catch error
+    (IO.puts error)))
+

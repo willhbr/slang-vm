@@ -100,6 +100,9 @@ class Code
   TYPE = 24
   INSTANCE = 25
   IMPLEMENT = 26
+  RAISE = 27
+  TRY = 28
+  END_TRY = 29
 
   CODE_VALUES = Hash.new
   CODE_NAMES = Hash.new

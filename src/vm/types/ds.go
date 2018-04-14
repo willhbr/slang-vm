@@ -1,9 +1,22 @@
 package types
 
 import "math/big"
+import "fmt"
 
 type Closure interface {
 	IsBuiltin() bool
+}
+
+type SlangError struct {
+	Cause Value
+}
+
+func (s SlangError) Error() string {
+	return fmt.Sprintf("%+v", s.Cause)
+}
+
+func NewSlangError(cause Value) error {
+	return SlangError{Cause: cause}
 }
 
 func NewInt64(value int64) *big.Int {

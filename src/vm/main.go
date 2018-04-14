@@ -44,7 +44,12 @@ func Run(co *vm.Coroutine, startIndex int) {
 					for i := size - 1; i >= 0; i-- {
 						arguments[i] = co.Stack.Pop()
 					}
-					result := fun.(types.GoClosure).Function(arguments...)
+					result, err := fun.(types.GoClosure).Function(arguments...)
+					// lol no errors
+					if err != nil {
+						// TODO jump to next error handle
+						panic(err)
+					}
 					co.Stack.Push(result)
 					break Finished
 				case types.SlangClosure:
@@ -52,6 +57,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 					currentFrame.ContinueIndex = index
 					index = int(closure.ProgramPosition)
 					currentFrame = vm.NewFrameFrom(currentFrame)
+					currentFrame.StackPosition = co.Stack.Len()
 					for i, value := range closure.Registers {
 						currentFrame.Registers[i] = value
 					}
@@ -135,6 +141,28 @@ func Run(co *vm.Coroutine, startIndex int) {
 		case op.RETURN:
 			currentFrame = currentFrame.CallingFrame
 			index = currentFrame.ContinueIndex
+		case op.RAISE:
+			// TODO Record some kind of error trace here
+			// err := co.Stack.Pop()
+			frame := currentFrame
+			for {
+				if frame.CatchIndexes.IsEmpty() {
+					frame = frame.CallingFrame
+					if frame == nil {
+						err := co.Stack.Pop()
+						panic(types.NewSlangError(err))
+					}
+				} else {
+					index = frame.CatchIndexes.Pop()
+					break
+				}
+			}
+		case op.TRY:
+			offset := int(program[index])
+			index++
+			currentFrame.CatchIndexes.Push(index + offset)
+		case op.END_TRY:
+			currentFrame.CatchIndexes.Pop()
 		case op.NEW_MAP:
 			count := int(program[index])
 			index++
@@ -188,6 +216,8 @@ func Run(co *vm.Coroutine, startIndex int) {
 				attributes[i] = co.Stack.Pop()
 			}
 			co.Stack.Push(types.NewInstance(instType, attributes))
+		case op.IMPLEMENT:
+			panic("Not implemented")
 		case op.CLOSURE:
 			start := uint(program[index])
 			index++

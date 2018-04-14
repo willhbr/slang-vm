@@ -93,6 +93,21 @@ class LocalResolver
         end
       when 'fn'
         process_fn(ast)
+      when 'try'
+        c = ast[-1]
+        raise "Try must end with catch" unless c[0].whole == 'catch'
+        ast[1..-1].each do |expr|
+          process(expr)
+        end
+      when 'catch'
+        @state.rescope do
+          name = ast[1]
+          raise "Not an identifier: #{name}" unless name.is_a? Identifier
+          bind_new! name
+          ast[2..-1].each do |node|
+            process(node)
+          end
+        end
       else
         if Identifier::KEYWORDS.include? first.whole
           ast[1..-1].each { |node| process(node) }

@@ -14,7 +14,7 @@ func NewSlangClosure(position uint) SlangClosure {
 }
 
 type GoClosure struct {
-	Function func(...Value) Value
+	Function func(...Value) (Value, error)
 }
 
 type ProtocolClosure struct {
