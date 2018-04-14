@@ -23,8 +23,13 @@ module ASTProcessor
     name = ast.class.to_s.downcase
     if self.respond_to? :"process_#{name}"
       self.send(:"process_#{name}", ast, top_level)
-    else
+    elsif self.respond_to? :process_other
       self.send(:process_other, ast, top_level)
+    else
+      raise """
+      No process implemented for #{name}
+      Compiling: #{ast.inspect}
+      """
     end
   end
 
