@@ -57,7 +57,7 @@ ordered, module_order = DAGOrder.order(global.modules, global.module_useage)
 
 if Flags[:show_modules]
   puts "===Modules==="
-  puts global.modules.join(', ')
+  puts global.modules.keys.join(', ')
 end
 if Flags[:show_order]
   puts "===Order==="

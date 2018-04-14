@@ -14,4 +14,4 @@ cd "$back"
 cd src/vm/types
 go generate
 cd "$back"
-go build -o bin/slgc src/vm/main.go
+go build -o bin/slang src/vm/main.go

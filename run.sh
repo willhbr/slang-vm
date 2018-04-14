@@ -9,4 +9,4 @@ shift 1
 
 ruby src/compiler/main.rb "$dest" *.slg "$@"
 
-bin/slgc "$dest"
+bin/slang "$dest"
