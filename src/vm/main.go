@@ -3,6 +3,7 @@ package main
 import (
 	op "./op_codes"
 	"./types"
+	"./utils"
 	"./vm"
 	"fmt"
 	"io/ioutil"
@@ -79,7 +80,8 @@ func Run(co *vm.Coroutine, startIndex int) {
 				}
 			}
 		case op.CONST_A:
-			value := program[index]
+			var value byte
+			value, index = utils.ReadAtom(program, index)
 			index++
 			co.Stack.Push(types.Atom(value))
 		case op.CONST_I:
@@ -88,19 +90,12 @@ func Run(co *vm.Coroutine, startIndex int) {
 			co.Stack.Push(types.NewInt(value))
 		case op.CONST_I_BIG:
 			var value int64
-			var read int64
-			value = 0
-			end := index + 8
-			for ; index < end; index++ {
-				read = int64(program[index])
-				value = value | read
-				value = value << 8
-			}
+			value, index = utils.ReadBigInteger(program, index)
 			co.Stack.Push(types.NewInt64(value))
 		case op.CONST_S:
-			idx := program[index]
-			index++
-			str := strings[idx]
+			var idx byte
+			idx, index = utils.ReadString(program, index)
+			str := strings[int(idx)]
 			co.Stack.Push(types.Value(str))
 		case op.CONST_TRUE:
 			co.Stack.Push(types.Value(true))
@@ -240,14 +235,15 @@ func Run(co *vm.Coroutine, startIndex int) {
 
 func ParseStrings(instructions []byte, position *int) []string {
 	startPosition := *position
-	count := int(instructions[startPosition])
-	startPosition++
+	var size byte
+	size, startPosition = utils.ReadDefCount(instructions, startPosition)
+	count := int(size)
 	strings := make([]string, count, count)
 
 	for index := 0; index < count; index++ {
-		length := int(instructions[startPosition])
-		startPosition++
-		endPosition := startPosition + length
+		var length byte
+		length, startPosition = utils.ReadStringLen(instructions, startPosition)
+		endPosition := startPosition + int(length)
 		strings[index] = string(instructions[startPosition:endPosition])
 		startPosition = endPosition
 	}
@@ -256,8 +252,8 @@ func ParseStrings(instructions []byte, position *int) []string {
 }
 
 func ExpandDefsSlice(instructions []byte, position *int) {
-	size := instructions[*position]
-	*position++
+	var size byte
+	size, *position = utils.ReadDefCount(instructions, *position)
 	defs := make([]types.Value, int(size), int(size))
 	for i := range types.Defs {
 		defs[i] = types.Defs[i]

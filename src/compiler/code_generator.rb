@@ -48,22 +48,22 @@ class CodeGenerator
       push Code.CONST_NIL
     else
       if ast.local?
-        push Code.LOAD_LOCAL(Arg.local(ast.code, ast.whole))
+        push Code.LOAD_LOCAL(ast.code, ast.whole)
       else
-        push Code.LOAD_DEF(Arg.global(ast.code, ast.whole))
+        push Code.LOAD_DEF(ast.code, ast.whole)
       end
     end
   end
 
   def process_string(ast, top_level)
     code = @program.add_string(ast)      
-    push Code.CONST_S(Arg.string(code, ast))
+    push Code.CONST_S(code, ast)
   end
 
   def process_atom(ast, top_level)
     # TODO Use other set of IDs for atoms
     code = new_atom(ast)
-    push Code.CONST_A(Arg.atom(code, ast))
+    push Code.CONST_A(code, ast)
   end
 
   def new_atom(ast)
@@ -74,9 +74,9 @@ class CodeGenerator
     if ast > 255 || ast < 0
       # Encode as big endian, 64-bit (8 bytes) signed
       # TODO do this in a non-shitty way
-      push Code.CONST_I_BIG(Arg.integer(ast))
+      push Code.CONST_I_BIG(ast)
     else
-      push Code.CONST_I(Arg.integer(ast))
+      push Code.CONST_I(ast)
     end
   end
 
@@ -114,7 +114,7 @@ class CodeGenerator
         str = @program.add_string(name.whole)
         # TODO make this do a module
         push Code.CONST_S(str, name.whole)
-        push Code.DEFINE(Arg.global(name.code, name.name_and_location))
+        push Code.DEFINE(name.code, name.name_and_location)
         @value_on_stack = false
       when 'def'
         name = ast[1]
@@ -131,14 +131,14 @@ class CodeGenerator
         # Extra two for the two instructions pushed
         push Code.JUMP_BACK(@program.position - @func_recur_points[-1] + 2)
       when 'fn'
-        jump = Code.JUMP(-1)
+        jump = Code.JUMP(:TEMP)
         push jump
         pos = @program.position
         @func_recur_points << pos
         args = ast[1]
         captured = args.pop
         args.reverse.each do |arg|
-          push Code.STORE(Arg.local(arg.code, arg.whole))
+          push Code.STORE(arg.code, arg.whole)
         end
 
         body = ast[2..-1]
@@ -158,12 +158,12 @@ class CodeGenerator
       when 'if'
         _, cond, then_block, else_block = ast
         process(cond)
-        jump = Code.AND(-1) # Don't know where to jump to
+        jump = Code.AND(:TEMP) # Don't know where to jump to
         push jump
         start = @program.position
         process(then_block)
         if else_block
-          else_jump = Code.JUMP(-1)
+          else_jump = Code.JUMP(:TEMP)
           push else_jump
           else_start = @program.position
           jump.args[0] = @program.position - start
@@ -208,7 +208,7 @@ class CodeGenerator
       when 'try'
         content = ast[1..-2]
         catch_block = ast[-1]
-        try = Code.TRY(-1)
+        try = Code.TRY(:TEMP)
         push try
         start = @program.position
         content.each do |node|
@@ -216,7 +216,7 @@ class CodeGenerator
         end
         # Jump over the catch if successful
         push Code.END_TRY
-        jump = Code.JUMP(-1)
+        jump = Code.JUMP(:TEMP)
         push jump
         try.args[0] = @program.position - start
         error_start = @program.position

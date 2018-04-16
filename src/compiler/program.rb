@@ -72,126 +72,203 @@ class Program
   end
 end
 
-class Arg
-  def self.local(num, debug)
-    if num < 0 || num > 255
-      raise "Local arg code exceeds byte size: #{num} #{debug}"
-    end
-    new(:local, num, debug)
-  end
-
-  def self.global(num, debug)
-    # TODO increase to 2-4 bytes
-    if num < 0 || num > 255
-      raise "Global def code exceeds byte size: #{num} #{debug}"
-    end
-    new(:global, num, debug)
-  end
-
-  def self.string(num, debug)
-    # TODO increase to 2-4 bytes
-    if num < 0 || num > 255
-      raise "String code exceeds byte size: #{num} #{debug}"
-    end
-    new(:string, num, debug)
-  end
-
-  def self.atom(num, debug)
-    # TODO increase to 2-4 bytes
-    if num < 0 || num > 255
-      raise "Atom code exceeds byte size: #{num} #{debug}"
-    end
-    new(:atom, num, debug)
-  end
-
-  def self.integer(value)
-    new(:integer, value, value.to_s)
-  end
-
-  def initialize(type, code, debug)
-    @type = type
-    @code = code
-    @debug = debug
-  end
-
-  def bytes_into(buffer)
-    case @type
-    when :integer
-      if @code > 255 || @code < 0
-        [ @code ].pack('Q>').split('').each do |byte|
-          buffer << byte.ord
-        end
-      else
-        buffer << @code
-      end
-    else
-      buffer << @code
-    end
-  end
-
-  def to_s
-    "#{@code} (#{@debug})"
-  end
-end
-
 class Code
-  LOAD_LOCAL = 1
-  LOAD_DEF = 2
-  STORE = 3
-  INVOKE = 4
-  CONST_I = 5
-  CONST_I_BIG = 6
-  CONST_S = 7
-  CONST_A = 8
-  CONST_TRUE = 9
-  CONST_FALSE = 10
-  CONST_NIL = 11
-  JUMP = 12
-  JUMP_BACK = 13
-  AND = 14
-  RETURN = 15
-  CLOSURE = 16
-  PROTOCOL_CLOSURE = 17
-  NEW_MAP = 18
-  NEW_VECTOR = 19
-  NEW_LIST = 20
-  DEFINE = 21
-  TYPE = 22
-  INSTANCE = 23
-  IMPLEMENT = 24
-  RAISE = 25
-  TRY = 26
-  END_TRY = 27
-  DISCARD = 28
+  def self.sizeof(type)
+    case type
+    when :local, :integer, :string, :atom, :global, :arg_count, :offset, :position
+      1
+    when :big_integer
+      8
+    else
+      raise "Unknown type #{type}"
+    end
+  end
+
+  def self.fits_in(type, value)
+    case type
+    when :integer
+      0 < value && value < 255
+    when :big_integer
+      # TODO Check this
+      true
+    when :string, :atom, :global, :local
+      0 <= value && value <= 255
+    when :arg_count, :offset, :position
+      0 <= value && value <= 255
+    else
+      raise "Unknown type #{type}"
+    end
+  end
+
+  def self.write_bytes(buffer, type, value)
+    case type
+    when :local, :integer, :string, :atom, :global, :arg_count, :offset, :position
+      format = 'C'
+    when :big_integer
+      format = 'Q>'
+    else
+      raise "Unknown type: #{type}"
+    end
+    [ value ].pack(format).split('').each do |byte|
+      buffer << byte.ord
+    end
+  end
+
+  INSTRUCTIONS = {
+    LOAD_LOCAL: {
+      id: 1,
+      args: [:local]
+    },
+    LOAD_DEF: {
+     id: 2,
+     args: [:global]
+    },
+    STORE: {
+     id: 3,
+     args: [:local]
+    },
+    INVOKE: {
+     id: 4,
+     args: [:arg_count]
+    },
+    CONST_I: {
+     id: 5,
+     args: [:integer]
+    },
+    CONST_I_BIG: {
+     id: 6,
+     args: [:big_integer]
+    },
+    CONST_S: {
+     id: 7,
+     args: [:string]
+    },
+    CONST_A: {
+     id: 8,
+     args: [:atom]
+    },
+    CONST_TRUE: {
+     id: 9,
+     args: []
+    },
+    CONST_FALSE: {
+     id: 10,
+     args: []
+    },
+    CONST_NIL: {
+     id: 11,
+     args: []
+    },
+    JUMP: {
+     id: 12,
+     args: [:offset]
+    },
+    JUMP_BACK: {
+     id: 13,
+     args: [:offset]
+    },
+    AND: {
+     id: 14,
+     args: [:offset]
+    },
+    RETURN: {
+     id: 15,
+     args: []
+    },
+    CLOSURE: {
+     id: 16,
+     args: [:position, :arg_count],
+     vararg: :local
+    },
+    PROTOCOL_CLOSURE: {
+     id: 17,
+     args: [:global]
+    },
+    NEW_MAP: {
+     id: 18,
+     args: [:arg_count]
+    },
+    NEW_VECTOR: {
+     id: 19,
+     args: [:arg_count]
+    },
+    NEW_LIST: {
+     id: 20,
+     args: [:arg_count]
+    },
+    DEFINE: {
+     id: 21,
+     args: [:global]
+    },
+    TYPE: {
+     id: 22,
+     args: [:global, :string, :arg_count],
+     vararg: :local
+    },
+    INSTANCE: {
+     id: 23,
+     args: [:global, :arg_count]
+    },
+    IMPLEMENT: {
+     id: 24,
+     args: []
+    },
+    RAISE: {
+     id: 25,
+     args: []
+    },
+    TRY: {
+     id: 26,
+     args: [:offset]
+    },
+    END_TRY: {
+     id: 27,
+     args: []
+    },
+    DISCARD: {
+     id: 28,
+     args: []
+    }
+  }
 
   CODE_VALUES = Hash.new
   CODE_NAMES = Hash.new
 
   class << self
-    Code.constants(false).each do |const|
-      next if const == :CODE_VALUES || const == :CODE_NAMES
-      val = Code.const_get const
-      Code::CODE_VALUES[const] = val
-      Code::CODE_NAMES[val] = const
-      define_method(const) do |*args|
-        Code.new val, *args
+    Code::INSTRUCTIONS.each do |instruction, props|
+      val = props[:id]
+      Code::CODE_VALUES[instruction] = val
+      Code::CODE_NAMES[val] = instruction
+      define_method(instruction) do |args=[], debug=nil|
+        args = args.is_a?(Array) ? args : [args]
+        if debug != nil
+          debug = debug.is_a?(Array) ? debug : [debug]
+        end
+        size = 1
+        args.zip(props[:args]).map do |splat|
+          arg, type = splat
+          type ||= props[:vararg]
+          raise "Too many arguments for #{instruction}: #{args}" unless type
+          raise "Cannot have nil value: #{args}" unless arg
+          size += sizeof(type)
+          unless arg == :TEMP || fits_in(type, arg)
+            raise "Value too big for #{type}: #{arg}"
+          end
+        end
+        Code.new val, args, debug, size, props[:args], props[:vararg]
       end
     end
   end
 
   attr_reader :args
   attr_reader :debug
-  def initialize(code, args=[], debug=nil)
+  def initialize(code, args, debug, size, arg_types, vararg_type)
     @code = code
-    @args = args.is_a?(Array) ? args : [args]
-    if @args.any?(&:nil?)
-      raise "No args can be nil: #{args.inspect} #{debug.inspect}"
-    end
-    if debug
-      @debug = debug.is_a?(Array) ? debug : [debug]
-    else
-      @debug = nil
-    end
+    @args = args
+    @debug = debug
+    @size = size
+    @arg_types = arg_types
+    @vararg_type = vararg_type
   end
 
   def to_s(pos='')
@@ -214,17 +291,15 @@ class Code
 
   def >>(buffer)
     buffer << @code
-    @args.each do |arg|
-      if arg.is_a?(Arg)
-        arg.bytes_into(buffer)
-      else
-        buffer << arg
-      end
+    @args.zip(@arg_types).each do |splat|
+      arg, type = splat
+      type ||= @vararg_type
+      self.class.write_bytes(buffer, type, arg)
     end
   end
 
   def size
-    @args.size + 1
+    @size
   end
 end
 
