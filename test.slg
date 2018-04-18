@@ -1,11 +1,21 @@
 (module Main)
-(import Printable)
+(import Access)
+(import Equatable)
+(import Sequence)
 
-(try
-  (-> :foo
-      Atom.value
-      IO.puts)
-  (raise 5)
-  (catch error
-    (IO.puts error)))
+(defn reduce [coll init fun]
+  (let [hd (head coll)]
+    (if hd
+      (recur (tail coll) (fun init hd) fun)
+      coll)))
 
+(defn parse [program index]
+  (let [char (get program index)]
+    (if (= char "(")
+      (IO.puts "Bracket")
+      (IO.puts "nonbracket"))))
+
+
+
+(let [contents (File.read "test.slg")]
+  (reduce contents 0 (fn [acc val] (parse contents val) (+ val 1))))

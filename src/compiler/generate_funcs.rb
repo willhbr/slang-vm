@@ -34,7 +34,10 @@ def to_go_name(str)
     '<-' => '_lArr_',
     '<' => 'lessThan',
     '-' => 'minus',
-    '*' => 'times'
+    '*' => 'times',
+    '=' => '_eq_',
+    '+' => '_plus_',
+    '/' => '_div_'
   }.reduce str do |str, replace|
     str.gsub(*replace)
   end

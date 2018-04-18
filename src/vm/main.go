@@ -18,7 +18,6 @@ func Run(co *vm.Coroutine, startIndex int) {
 	currentFrame := co.CurrentFrame
 	for index < size {
 		operation := program[index]
-		// fmt.Println(op.ToString(operation))
 		index++
 		switch operation {
 		case op.LOAD_LOCAL:
@@ -82,7 +81,6 @@ func Run(co *vm.Coroutine, startIndex int) {
 		case op.CONST_A:
 			var value byte
 			value, index = utils.ReadAtom(program, index)
-			index++
 			co.Stack.Push(types.Atom(value))
 		case op.CONST_I:
 			value := program[index]
@@ -193,7 +191,7 @@ func Run(co *vm.Coroutine, startIndex int) {
 				attributes[i] = program[index]
 				index++
 			}
-			newType := types.NewType(co.Program.Strings[nameIndex], attributes)
+			newType := types.NewType(string(co.Program.Strings[nameIndex]), attributes)
 			types.Defs[int(id)] = newType
 		case op.INSTANCE:
 			typeID := int(program[index])

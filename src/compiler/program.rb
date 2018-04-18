@@ -87,7 +87,7 @@ class Code
   def self.fits_in(type, value)
     case type
     when :integer
-      0 < value && value < 255
+      0 <= value && value <= 255
     when :big_integer
       # TODO Check this
       true

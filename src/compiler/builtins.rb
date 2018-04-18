@@ -13,7 +13,18 @@ defmodule :Kernel do
   defn :type
   defn :<
   defn :-
+  defn :+
+  defn :/
   defn :*
+end
+
+defmodule :Access do
+  defprotocol :get
+  # defprotocol :set
+end
+
+defmodule :Equatable do
+  defprotocol :"="
 end
 
 deftype :Int, '*big.Int' do
@@ -22,11 +33,17 @@ end
 
 deftype :String, 'string' do
   defimpls :Printable
+  defimpls :Access
+  defimpls :Equatable
 end
 
 deftype :Atom do
   defimpls :Printable
   defn :value
+end
+
+defmodule :File do
+  defn :read
 end
 
 deftype :Channel, 'chan Value' do

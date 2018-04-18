@@ -26,3 +26,15 @@ func Kernel__times(_ *Program, arguments ...Value) (Value, error) {
 	result.Mul(arguments[0].(*big.Int), arguments[1].(*big.Int))
 	return &result, nil
 }
+
+func Kernel___plus_(_ *Program, arguments ...Value) (Value, error) {
+	result := big.Int{}
+	result.Add(arguments[0].(*big.Int), arguments[1].(*big.Int))
+	return &result, nil
+}
+
+func Kernel___div_(_ *Program, arguments ...Value) (Value, error) {
+	result := big.Int{}
+	result.Div(arguments[0].(*big.Int), arguments[1].(*big.Int))
+	return &result, nil
+}

@@ -1,37 +1,39 @@
 package types
 import "math/big"
-// Int: 10
+// Int: 16
 var IntType = &Type{Name: "Int",
 ProtocolMethods: map[int]Closure{
 1: GoClosure{Function: Int___rArr_string},
 }}
-// String: 12
+// String: 18
 var StringType = &Type{Name: "String",
 ProtocolMethods: map[int]Closure{
 1: GoClosure{Function: String___rArr_string},
+13: GoClosure{Function: String__get},
+15: GoClosure{Function: String___eq_},
 }}
-// Atom: 14
+// Atom: 22
 var AtomType = &Type{Name: "Atom",
 ProtocolMethods: map[int]Closure{
 1: GoClosure{Function: Atom___rArr_string},
 }}
-// Channel: 17
+// Channel: 27
 var ChannelType = &Type{Name: "Channel",
 ProtocolMethods: map[int]Closure{
 }}
-// List: 27
+// List: 37
 var ListType = &Type{Name: "List",
 ProtocolMethods: map[int]Closure{
-22: GoClosure{Function: List__conj},
-23: GoClosure{Function: List__head},
-24: GoClosure{Function: List__tail},
+32: GoClosure{Function: List__conj},
+33: GoClosure{Function: List__head},
+34: GoClosure{Function: List__tail},
 }}
-// Vector: 32
+// Vector: 42
 var VectorType = &Type{Name: "Vector",
 ProtocolMethods: map[int]Closure{
-22: GoClosure{Function: Vector__conj},
-23: GoClosure{Function: Vector__head},
-24: GoClosure{Function: Vector__tail},
+32: GoClosure{Function: Vector__conj},
+33: GoClosure{Function: Vector__head},
+34: GoClosure{Function: Vector__tail},
 }}
 
     func GetType(object Value) *Type {

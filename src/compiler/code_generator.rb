@@ -105,7 +105,6 @@ class CodeGenerator
           push Code.DISCARD
         end
         process(ast[-1])
-        push Code.DISCARD
       when 'alias', 'import'
         @value_on_stack = false
         return

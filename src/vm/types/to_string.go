@@ -11,7 +11,7 @@ func String___rArr_string(_ *Program, args ...Value) (Value, error) {
 }
 
 func Atom___rArr_string(prog *Program, args ...Value) (Value, error) {
-	return ":" + prog.Strings[args[0].(Atom)], nil
+	return ":" + string(prog.Strings[args[0].(Atom)]), nil
 }
 
 func Atom__value(prog *Program, args ...Value) (Value, error) {
